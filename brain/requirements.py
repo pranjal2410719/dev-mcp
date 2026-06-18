@@ -12,6 +12,7 @@ import re
 from pathlib import Path
 from app import mcp
 from security import validate_path
+from brain.todo_engine import _load_todos, _load_completed
 
 REQUIREMENTS_FILE = "requirements.json"
 
@@ -132,8 +133,7 @@ def verify_requirements(feature_name: str = "", path: str = ".") -> str:
     if not reqs:
         return f"No requirements found for feature '{feature_name}'."
         
-    # Scan project files to match keywords
-    from brain.sync_engine import IGNORE_DIRS, SCAN_EXTENSIONS
+    from brain.guardian import IGNORE_DIRS, SCAN_EXTENSIONS
     
     code_files = []
     for dirpath, dirnames, filenames in os.walk(root):
