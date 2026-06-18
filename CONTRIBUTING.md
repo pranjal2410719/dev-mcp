@@ -112,6 +112,14 @@ Make sure to validate your changes before pushing them. The repository includes 
 
 All contributions must pass the pipeline tests before submitting a Pull Request.
 
+### 5. Hot Reloading & Client Reconnections
+When editing tools or modifying server code, the active stdio pipe cached by your AI Client (e.g., Cursor, Claude Desktop) will go out of sync or throw EOF errors. 
+
+Make sure to restart the MCP server in your client settings to force-load your modifications:
+- **Cursor:** Settings -> Features -> MCP -> click **Restart** on `dev-mcp`.
+- **Claude Desktop:** Fully **Quit** the app and reopen it.
+- **Cline / Roo Code:** Restart the extension or run `/mcp restart dev-mcp`.
+
 ---
 
 ## 🚀 Contribution Pipeline

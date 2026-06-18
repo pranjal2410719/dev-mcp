@@ -199,6 +199,20 @@ export DEV_MCP_ALLOWED_DIRS="/home/user/project1:/home/user/project2"
 
 ---
 
+## 🔌 Troubleshooting & Connection Lifecycle
+
+When developing or updating code in `dev-mcp`, keep in mind how MCP clients handle the process lifecycle:
+- **Stateful Connection:** Most AI clients (like Cursor or Claude Desktop) cache the active `stdio` pipe connection to the server process.
+- **Out-of-Sync State:** If the server is updated or restarted, the client’s stdio connection can become stale, resulting in `EOF` or `client closing` errors.
+
+### How to Reconnect Across Clients:
+- **Cursor:** Go to **Settings** -> **Features** -> **MCP** -> find `dev-mcp` and click **Restart**.
+- **Claude Desktop:** Fully **Quit** the app from your taskbar/dock and reopen it to force Claude to spawn a new MCP process.
+- **Cline / Roo Code:** Restart the extension or trigger a reconnect via `/mcp restart dev-mcp`.
+- **Windsurf:** Reload the editor window or restart the workspace connection.
+
+---
+
 ## 🧪 Running Validation Tests
 
 Ensure server correctness and E2E workflow consistency by executing the pipeline script:

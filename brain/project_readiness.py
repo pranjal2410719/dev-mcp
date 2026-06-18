@@ -41,6 +41,17 @@ def _check_tests_local(root: Path) -> bool:
     return False
 
 
+def _is_populated_repo(root: Path) -> bool:
+    """Check if repository has existing custom source files (excluding server setup files)."""
+    from brain.guardian import IGNORE_DIRS, SCAN_EXTENSIONS
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in IGNORE_DIRS and not d.startswith(".")]
+        for name in filenames:
+            if Path(name).suffix in SCAN_EXTENSIONS and name not in ("server.py", "app.py", "context.py", "security.py"):
+                return True
+    return False
+
+
 def _run_readiness_audit(root: Path) -> dict[str, any]:
     """Execute the scoring checks against the workspace."""
     checklist = {
@@ -158,12 +169,25 @@ def assess_project_readiness(path: str = ".") -> str:
     if audit["score"] >= 85 and _check_tests_local(root):
         level = "Level 5: Autonomous Ready"
         
+    # Detect appropriate onboarding commands based on repository state
+    onboarding_commands = []
+    if score < 80:
+        if _is_populated_repo(root):
+            onboarding_commands.append(f"adopt_existing_project(path=\"{root}\")")
+        else:
+            onboarding_commands.append(f"bootstrap_project(path=\"{root}\")")
+        onboarding_commands.append(f"extract_requirements(path=\"{root}\")")
+        onboarding_commands.append(f"start_session(path=\"{root}\")")
+    else:
+        onboarding_commands.append(f"start_session(path=\"{root}\")")
+
     output = {
         "project": root.name,
         "readiness_score": score,
         "readiness_level": level,
         "missing_components": [audit["checklist"][m]["label"] for m in audit["missing"]],
-        "recommendations": [f"Create {audit['checklist'][m]['label']}" for m in audit["missing"]]
+        "recommendations": [f"Create {audit['checklist'][m]['label']}" for m in audit["missing"]],
+        "next_steps_commands": onboarding_commands
     }
     
     return json.dumps(output, indent=2)
@@ -233,10 +257,16 @@ def project_readiness_report(path: str = ".") -> str:
             else:
                 report.append(f"- **{comp['label']}**: Create required file: `{key}`.")
         
+        setup_cmd = f"adopt_existing_project(path=\"{root}\")" if _is_populated_repo(root) else f"bootstrap_project(path=\"{root}\")"
         report.extend([
             "",
-            "✨ **Pro-tip:** You can automatically bootstrap all missing files (except Git and tests) by running:",
-            "`bootstrap_project()`"
+            "⚙️ **Recommended Next Onboarding Commands:**",
+            "Please execute the following sequence of tool calls to onboard this repository:",
+            "```text",
+            f"1. {setup_cmd}",
+            f"2. extract_requirements(path=\"{root}\")",
+            f"3. start_session(path=\"{root}\")",
+            "```"
         ])
     else:
         report.extend([
