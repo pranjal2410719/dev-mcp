@@ -169,24 +169,94 @@ def assess_project_readiness(path: str = ".") -> str:
     if audit["score"] >= 85 and _check_tests_local(root):
         level = "Level 5: Autonomous Ready"
         
-    # Detect appropriate onboarding commands based on repository state
+    # Calculate structured next best command and full steps list based on current workspace state
+    setup_cmd = f"adopt_existing_project(path=\"{root}\")" if _is_populated_repo(root) else f"bootstrap_project(path=\"{root}\")"
+    context_exists = root.joinpath(".project-context.json").is_file()
+    brain_exists = root.joinpath(".project_brain").is_dir()
+    reqs_exists = root.joinpath(".project_brain", "prd", "requirements.json").is_file()
+    
     onboarding_commands = []
-    if score < 80:
-        if _is_populated_repo(root):
-            onboarding_commands.append(f"adopt_existing_project(path=\"{root}\")")
-        else:
-            onboarding_commands.append(f"bootstrap_project(path=\"{root}\")")
-        onboarding_commands.append(f"extract_requirements(path=\"{root}\")")
-        onboarding_commands.append(f"start_session(path=\"{root}\")")
+    next_best_single = ""
+    
+    if not context_exists or not brain_exists:
+        next_best_single = setup_cmd
+        onboarding_commands = [setup_cmd, f"extract_requirements(path=\"{root}\")", f"start_session(path=\"{root}\")"]
+    elif not reqs_exists:
+        next_best_single = f"extract_requirements(path=\"{root}\")"
+        onboarding_commands = [f"extract_requirements(path=\"{root}\")", f"start_session(path=\"{root}\")"]
     else:
-        onboarding_commands.append(f"start_session(path=\"{root}\")")
+        # Check if we have active tasks
+        tasks_file = root / ".project_brain" / "todos" / "active.json"
+        has_tasks = False
+        if tasks_file.exists():
+            try:
+                has_tasks = len(json.loads(tasks_file.read_text(encoding="utf-8"))) > 0
+            except Exception:
+                pass
+        
+        if not has_tasks:
+            next_best_single = f"create_task(title=\"First Task\", path=\"{root}\")"
+            onboarding_commands = [f"create_task(title=\"First Task\", path=\"{root}\")", f"start_session(path=\"{root}\")"]
+        else:
+            next_best_single = f"start_session(path=\"{root}\")"
+            onboarding_commands = [f"start_session(path=\"{root}\")", f"project_dashboard(path=\"{root}\")"]
+
+    # Build structured readiness actions
+    readiness_actions = []
+    priority_counter = 1
+    
+    # Priority 1: Initialize Git
+    if "git" in audit["missing"]:
+        readiness_actions.append({
+            "priority": priority_counter,
+            "action": "Initialize Git Version Control",
+            "tool": "git init"
+        })
+        priority_counter += 1
+        
+    # Priority 2: Create README
+    if "readme" in audit["missing"]:
+        readiness_actions.append({
+            "priority": priority_counter,
+            "action": "Create a project README.md documenting setup and vision",
+            "tool": "write_file"
+        })
+        priority_counter += 1
+        
+    # Priority 3: Project Brain / Onboarding Configuration
+    if "context" in audit["missing"] or "prd" in audit["missing"]:
+        readiness_actions.append({
+            "priority": priority_counter,
+            "action": "Adopt/Bootstrap project settings and requirements documents",
+            "tool": "adopt_existing_project" if _is_populated_repo(root) else "bootstrap_project"
+        })
+        priority_counter += 1
+        
+    # Priority 4: Milestones & Tasks
+    if "milestones" in audit["missing"] or "tasks" in audit["missing"]:
+        readiness_actions.append({
+            "priority": priority_counter,
+            "action": "Define project phases, milestones, and initial task backlog",
+            "tool": "add_milestone / create_task"
+        })
+        priority_counter += 1
+        
+    # Priority 5: Tests
+    if "tests" in audit["missing"]:
+        readiness_actions.append({
+            "priority": priority_counter,
+            "action": "Write unit or integration tests for the codebase modules",
+            "tool": "verify_work"
+        })
+        priority_counter += 1
 
     output = {
         "project": root.name,
         "readiness_score": score,
         "readiness_level": level,
         "missing_components": [audit["checklist"][m]["label"] for m in audit["missing"]],
-        "recommendations": [f"Create {audit['checklist'][m]['label']}" for m in audit["missing"]],
+        "readiness_actions": readiness_actions,
+        "next_best_single_command": next_best_single,
         "next_steps_commands": onboarding_commands
     }
     
@@ -257,23 +327,49 @@ def project_readiness_report(path: str = ".") -> str:
             else:
                 report.append(f"- **{comp['label']}**: Create required file: `{key}`.")
         
-        setup_cmd = f"adopt_existing_project(path=\"{root}\")" if _is_populated_repo(root) else f"bootstrap_project(path=\"{root}\")"
-        report.extend([
-            "",
-            "⚙️ **Recommended Next Onboarding Commands:**",
-            "Please execute the following sequence of tool calls to onboard this repository:",
-            "```text",
-            f"1. {setup_cmd}",
-            f"2. extract_requirements(path=\"{root}\")",
-            f"3. start_session(path=\"{root}\")",
-            "```"
-        ])
+    # Calculate state-based onboarding command sequence
+    setup_cmd = f"adopt_existing_project(path=\"{root}\")" if _is_populated_repo(root) else f"bootstrap_project(path=\"{root}\")"
+    context_exists = root.joinpath(".project-context.json").is_file()
+    brain_exists = root.joinpath(".project_brain").is_dir()
+    reqs_exists = root.joinpath(".project_brain", "prd", "requirements.json").is_file()
+    
+    next_best_single = ""
+    onboarding_commands = []
+    
+    if not context_exists or not brain_exists:
+        next_best_single = setup_cmd
+        onboarding_commands = [setup_cmd, f"extract_requirements(path=\"{root}\")", f"start_session(path=\"{root}\")"]
+    elif not reqs_exists:
+        next_best_single = f"extract_requirements(path=\"{root}\")"
+        onboarding_commands = [f"extract_requirements(path=\"{root}\")", f"start_session(path=\"{root}\")"]
     else:
-        report.extend([
-            "## 🎉 Project is Fully Onboarded",
-            "Your workspace contains all structures and is ready for autonomous Tech Lead workflows.",
-            "Start your coding session using `start_session()`."
-        ])
+        # Check if we have active tasks
+        tasks_file = root / ".project_brain" / "todos" / "active.json"
+        has_tasks = False
+        if tasks_file.exists():
+            try:
+                has_tasks = len(json.loads(tasks_file.read_text(encoding="utf-8"))) > 0
+            except Exception:
+                pass
+        
+        if not has_tasks:
+            next_best_single = f"create_task(title=\"First Task\", path=\"{root}\")"
+            onboarding_commands = [f"create_task(title=\"First Task\", path=\"{root}\")", f"start_session(path=\"{root}\")"]
+        else:
+            next_best_single = f"start_session(path=\"{root}\")"
+            onboarding_commands = [f"start_session(path=\"{root}\")", f"project_dashboard(path=\"{root}\")"]
+
+    report.extend([
+        "",
+        "⚙️ **Next Recommended Action:**",
+        f"`{next_best_single}`",
+        "",
+        "📋 **Suggested Onboarding Execution Steps:**",
+        "```text",
+    ])
+    for idx, cmd in enumerate(onboarding_commands, 1):
+        report.append(f"{idx}. {cmd}")
+    report.append("```")
         
     return "\n".join(report)
 
@@ -585,3 +681,126 @@ def adopt_existing_project(path: str = ".") -> str:
         "2. Run `extract_requirements()` to parse the PRD.\n"
         "3. Run `start_session()` to initialize your first development sprint."
     )
+
+
+@mcp.tool(
+    name="doctor",
+    description="Check the diagnostic health and configuration integrity of the Project Brain and MCP server.",
+)
+def doctor(path: str = ".") -> str:
+    """Validate MCP setup, context configuration, repository structures, and PRDs.
+    
+    Args:
+        path: Project root directory.
+    """
+    root = validate_path(path)
+    
+    checks = []
+    
+    # Check 1: Server running
+    checks.append(("Server Status", "running", True, "FastMCP stdio server running"))
+    
+    # Check 2: Context file loaded
+    ctx_path = root / ProjectContext.FILE_NAME
+    if ctx_path.is_file():
+        try:
+            ctx_data = json.loads(ctx_path.read_text(encoding="utf-8"))
+            checks.append(("Context File", "found", True, "Loaded .project-context.json successfully"))
+        except Exception as e:
+            checks.append(("Context File", "corrupted", False, f"Failed parsing .project-context.json: {e}"))
+    else:
+        checks.append(("Context File", "missing", False, "No .project-context.json found. Run init_context() or adopt_existing_project()"))
+        
+    # Check 3: Project Brain folder
+    brain_dir = root / ".project_brain"
+    if brain_dir.is_dir():
+        checks.append(("Project Brain Folder", "found", True, "Directory .project_brain/ exists"))
+    else:
+        checks.append(("Project Brain Folder", "missing", False, "No .project_brain/ folder. Run adopt_existing_project() or bootstrap_project()"))
+        
+    # Check 4: Git version control
+    if _is_git_repo_local(root):
+        checks.append(("Git Repository", "initialized", True, "Git repository active"))
+    else:
+        checks.append(("Git Repository", "missing", False, "Git repository not initialized (git init)"))
+        
+    # Check 5: PRD
+    prd_file = brain_dir / "prd" / "PRD.md"
+    if prd_file.is_file():
+        checks.append(("PRD Document", "found", True, f"PRD loaded ({len(prd_file.read_text(encoding='utf-8'))} chars)"))
+    else:
+        checks.append(("PRD Document", "missing", False, "PRD.md missing under .project_brain/prd/"))
+        
+    # Check 6: Requirements JSON
+    reqs_file = brain_dir / "prd" / "requirements.json"
+    if reqs_file.is_file():
+        try:
+            reqs = json.loads(reqs_file.read_text(encoding="utf-8"))
+            checks.append(("Requirements Matrix", "extracted", True, f"Loaded {len(reqs)} requirements from requirements.json"))
+        except Exception as e:
+            checks.append(("Requirements Matrix", "corrupted", False, f"Failed parsing requirements.json: {e}"))
+    else:
+        checks.append(("Requirements Matrix", "missing", False, "requirements.json missing. Run extract_requirements()"))
+        
+    # Check 7: Active Tasks
+    tasks_file = brain_dir / "todos" / "active.json"
+    if tasks_file.is_file():
+        try:
+            todos = json.loads(tasks_file.read_text(encoding="utf-8"))
+            checks.append(("Task Backlog", "initialized", True, f"Found {len(todos)} active/pending tasks"))
+        except Exception:
+            checks.append(("Task Backlog", "corrupted", False, "Failed parsing active.json backlog"))
+    else:
+        checks.append(("Task Backlog", "missing", False, "No task tracking active.json backlog found"))
+        
+    # Determine Health Status
+    successful_checks = sum(1 for c in checks if c[2])
+    total_checks = len(checks)
+    
+    status = "Ready"
+    if successful_checks == total_checks:
+        status = "Healthy ✅"
+    elif successful_checks >= total_checks - 2:
+        status = "Ready with warnings ⚠️"
+    else:
+        status = "Uninitialized / Broken ❌"
+        
+    report = [
+        "# 🩺 dev-mcp Diagnostic Health Check",
+        f"**Project Root:** `{root}`",
+        f"**MCP Status:** {status} ({successful_checks}/{total_checks} checks passed)",
+        "",
+        "## 📋 Diagnostics Breakdown",
+    ]
+    
+    for title, state, success, msg in checks:
+        icon = "✓" if success else "✗"
+        report.append(f"- **{icon} {title}** — [{state.upper()}] {msg}")
+        
+    report.append("")
+    report.append("---")
+    
+    # Recommend next command based on fails
+    all_success = all(c[2] for c in checks)
+    if not all_success:
+        # Check first fail
+        first_fail = None
+        for c in checks:
+            if not c[2]:
+                first_fail = c[0]
+                break
+        
+        report.append("### 💡 Recommended Fix:")
+        if first_fail == "Git Repository":
+            report.append("Run `git init` in the project root to start tracking version control.")
+        elif first_fail in ("Context File", "Project Brain Folder"):
+            setup = "adopt_existing_project()" if _is_populated_repo(root) else "bootstrap_project()"
+            report.append(f"Execute `{setup}` to initialize configuration files and templates.")
+        elif first_fail == "PRD Document":
+            report.append("Create or edit `.project_brain/prd/PRD.md` to document feature specifications.")
+        elif first_fail == "Requirements Matrix":
+            report.append("Run `extract_requirements()` to parse requirements from PRD.")
+        elif first_fail == "Task Backlog":
+            report.append("Create tasks using `create_task(title='...', description='...')`.")
+            
+    return "\n".join(report)

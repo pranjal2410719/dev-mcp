@@ -145,7 +145,8 @@ Once connected, guide your AI through **11 Public Core Workflows**. The server h
 ### Step 1: Onboard a Codebase
 Open any code repository on your computer and run:
 1. `assess_project_readiness` — Evaluates directory files and computes a project readiness score (0-100%) and maturity level (Levels 0-5).
-2. **Bootstrap or Migrate:**
+2. `doctor` — Run a complete diagnostic health check on your Project Brain, context, configuration, and setup.
+3. **Bootstrap or Migrate:**
    - **For new projects:** Run `bootstrap_project()` to write empty directories, project contexts, and milestones.
    - **For existing codebases:** Run `adopt_existing_project()` to scan language extensions, parse the current `README.md` to draft goals, and populate task backlogs.
 
