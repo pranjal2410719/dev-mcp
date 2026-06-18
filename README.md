@@ -4,6 +4,10 @@
 
 Rather than treating the AI as a stateless code generator, `dev-mcp` establishes a persistent **Project Brain** in your workspace directory. This allows you to switch between different AI models and platforms seamlessly without losing context, project goals, tasks, or guidelines.
 
+> [!TIP]
+> **Complete User Manual Available**
+> For the comprehensive guide, including detailed setup, loops, slash commands, and a complete catalog of all 70 MCP tools with parameter signatures, see the **[docs/user_manual.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/user_manual.md)**.
+
 ---
 
 ## 👥 Author & Maintainer Profile
