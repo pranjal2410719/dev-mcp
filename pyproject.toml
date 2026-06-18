@@ -4,9 +4,26 @@ version = "0.1.0"
 description = "A custom MCP server for managing, building, editing, and customizing projects with AI"
 readme = "README.md"
 requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Pranjal Yadav", email = "2k24.cs1l.2410719@gmail.com" }
+]
+maintainers = [
+    { name = "Pranjal Yadav", email = "2k24.cs1l.2410719@gmail.com" }
+]
+keywords = ["mcp", "model-context-protocol", "fastmcp", "ai-engineering", "project-management"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
 dependencies = [
     "fastmcp>=2.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/pranjal2410719/dev-mcp"
+Repository = "https://github.com/pranjal2410719/dev-mcp"
 
 [project.scripts]
 dev-mcp = "server:main"
