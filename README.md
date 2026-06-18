@@ -1,25 +1,37 @@
 # 🧠 dev-mcp: AI Engineering Operating System
 
-`dev-mcp` is a custom **Model Context Protocol (MCP)** server that turns your AI assistants (Claude, Cursor, Gemini, Cline, Windsurf) into active **Technical Project Managers**. 
+`dev-mcp` is a custom **Model Context Protocol (MCP)** server that turns your AI assistants (Claude, Cursor, Gemini, Cline, Roo Code, Windsurf) into active **Technical Project Managers**. 
 
-Rather than treating the AI as a stateless code generator, `dev-mcp` establishes a persistent **Project Brain** in your workspace directory. This allows you to switch between different AI models and platforms seamlessly without losing context.
+Rather than treating the AI as a stateless code generator, `dev-mcp` establishes a persistent **Project Brain** in your workspace directory. This allows you to switch between different AI models and platforms seamlessly without losing context, project goals, tasks, or guidelines.
 
 ---
 
-## 🚀 Quick Setup & Installation
+## 👥 Author & Maintainer Profile
+
+For issues, questions, or collaboration requests, contact:
+
+* **Name:** Pranjal Yadav
+* **Email:** [2k24.cs1l.2410719@gmail.com](mailto:2k24.cs1l.2410719@gmail.com)
+* **Phone:** +91 9219920362
+* **LinkedIn:** [linkedin.com/in/-pranjal22/](https://www.linkedin.com/in/-pranjal22/)
+* **GitHub:** [github.com/pranjal2410719](https://github.com/pranjal2410719)
+
+---
+
+## 🚀 Full Setup & Installation Guide
 
 ### 1. Prerequisites
 - **Python 3.10+**
 - **Git**
 
-### 2. Installation
+### 2. Local Installation
 Navigate to your `dev-mcp` directory and set up a virtual environment:
 
 ```bash
 # Navigate to the server directory
 cd /home/dev/Desktop/projects/mcp/dev-mcp
 
-# Create a virtual environment using uv (recommended) or venv
+# Create a virtual environment using uv (recommended)
 uv venv
 source .venv/bin/activate
 uv pip install -e .
@@ -95,7 +107,7 @@ If using Cline, open the extension settings, select **MCP Settings**, and add:
 
 ## 👑 The Onboarding & Execution Workflow
 
-Once connected, you only need to guide your AI through **11 Public Core Workflows**. The server conceals 53 low-level helper tools under the hood.
+Once connected, guide your AI through **11 Public Core Workflows**. The server handles 53 low-level helper tools under the hood.
 
 ```
                          assess_project_readiness()
@@ -106,13 +118,13 @@ Once connected, you only need to guide your AI through **11 Public Core Workflow
                  │                                       │
                  └───────────────────┬───────────────────┘
                                      ▼
-                              start_session()
+                               start_session()
                                      │
                                      ▼
                             project_dashboard()
                                      │
                                      ▼
-                             next_best_action()
+                              next_best_action()
                                      │
                                      ▼
         [Sync Plan] ──►       sync_workspace()
@@ -124,34 +136,25 @@ Once connected, you only need to guide your AI through **11 Public Core Workflow
         [Audit Goal] ──►       verify_outcome()
                                      │
                                      ▼
-                               end_session()
+                                end_session()
                                      │
                                      ▼
-                         prepare_commit() ──► commit_changes()
+                          prepare_commit() ──► commit_changes()
 ```
 
----
-
 ### Step 1: Onboard a Codebase
-
-First, open any code repository on your computer and run:
+Open any code repository on your computer and run:
 1. `assess_project_readiness` — Evaluates directory files and computes a project readiness score (0-100%) and maturity level (Levels 0-5).
 2. **Bootstrap or Migrate:**
    - **For new projects:** Run `bootstrap_project()` to write empty directories, project contexts, and milestones.
    - **For existing codebases:** Run `adopt_existing_project()` to scan language extensions, parse the current `README.md` to draft goals, and populate task backlogs.
 
----
-
 ### Step 2: Set the Scope
-
 Open the generated `.project_brain/prd/PRD.md` file and verify your goals. Run:
 1. `extract_requirements` — Extracts requirements and keywords into `requirements.json`.
 2. `start_session` — Bootstraps a development sprint and prints a Markdown brief for the model.
 
----
-
 ### Step 3: Run the Session Loop
-
 During active coding:
 1. `project_dashboard` — View uncommitted git changes, milestones, active tasks, and code health logs.
 2. `next_best_action` — Asks the engine to determine the next unblocked priority task.
@@ -159,10 +162,7 @@ During active coding:
 4. `verify_work` — Gathers file existences, test paths, and guardian violations to compile a verification dossier.
 5. `verify_outcome` — Audits the code structure for database mutations, inputs, and routing to verify business goals.
 
----
-
 ### Step 4: Safe Session Conclusion
-
 When the task is complete, close the session without corrupting git history:
 1. `end_session` — Generates a markdown session handoff log.
 2. `prepare_commit` — Analyzes changes and suggests a conventional commit message (e.g. `feat(auth): add login form`).
@@ -199,8 +199,12 @@ export DEV_MCP_ALLOWED_DIRS="/home/user/project1:/home/user/project2"
 
 ---
 
-## 🧪 Testing with Inspector
-Verify registration and inspect tools interactively:
+## 🧪 Running Validation Tests
+
+Ensure server correctness and E2E workflow consistency by executing the pipeline script:
+
 ```bash
-npx @modelcontextprotocol/inspector python server.py
+.venv/bin/python tests/validate_mcp_flow.py
 ```
+
+For guidelines on coding conventions, code style, and how to write custom tools for this server, see **[CONTRIBUTING.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/CONTRIBUTING.md)**.
