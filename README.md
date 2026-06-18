@@ -168,6 +168,10 @@ When the task is complete, close the session without corrupting git history:
 1. `end_session` — Generates a markdown session handoff log.
 2. `prepare_commit` — Analyzes changes and suggests a conventional commit message (e.g. `feat(auth): add login form`).
 3. `commit_changes` — Stages and commits changes with the approved message.
+### Step 5: Project Lifecycle & Resetting
+If you need to archive, rotate, or re-initialize a project context:
+1. `archive_project_brain` — Moves your active context and project brain configurations to `.project_brain_archive/` with a timestamp to preserve history.
+2. `reset_project_brain` — Wipes the context store and `.project_brain` files for the target folder, leaving your source code and git repository untouched.
 
 ---
 

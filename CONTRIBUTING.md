@@ -39,7 +39,7 @@ Generic, stateless utility wrappers:
 
 ### 3. Brain Layer (Project Operating System)
 Autonomous state engines orchestrating workflows:
-- **`project_readiness.py`**: Readiness grading scoring (Levels 0-5), onboarding bootstrap engines, and the `doctor` diagnostic health checker.
+- **`project_readiness.py`**: Readiness grading scoring (Levels 0-5), onboarding bootstrap engines, `doctor` diagnostic check, and project reset/archive lifecycle tools.
 - **`orchestrator.py`**: Session orchestration, target task calculation, and git auto-commit generators.
 - **`sync_engine.py`**: Workspace analyzer matching Git reality (branches, commits, diffs) to the task backlog.
 - **`requirements.py`**: PRD parsing and keyword trace traceability matrices.

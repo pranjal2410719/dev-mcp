@@ -44,10 +44,13 @@ _project_context: ProjectContext | None = None
 def load_context(project_root: str | Path | None = None) -> ProjectContext:
     """Get (or create) the global project context instance."""
     global _project_context
-    if _project_context is None:
-        from security import validate_path
-        root = validate_path(project_root) if project_root else Path.cwd().resolve()
-        _project_context = ProjectContext(root)
+    from security import validate_path
+    
+    target_root = validate_path(project_root) if project_root else Path.cwd().resolve()
+    
+    if _project_context is None or _project_context._root != target_root:
+        _project_context = ProjectContext(target_root)
+        
     return _project_context
 
 

@@ -804,3 +804,91 @@ def doctor(path: str = ".") -> str:
             report.append("Create tasks using `create_task(title='...', description='...')`.")
             
     return "\n".join(report)
+
+
+@mcp.tool(
+    name="reset_project_brain",
+    description="Wipe all Project Brain configuration, tasks, and context metadata inside the selected project. Leaves git and source code untouched.",
+)
+def reset_project_brain(path: str = ".") -> str:
+    """Delete the .project-context.json and .project_brain/ folder for the target directory.
+    
+    Args:
+        path: Project root directory.
+    """
+    root = validate_path(path)
+    
+    context_file = root / ".project-context.json"
+    brain_dir = root / ".project_brain"
+    
+    removed = []
+    
+    if context_file.is_file():
+        context_file.unlink()
+        removed.append("✓ Context Store (.project-context.json)")
+        
+    if brain_dir.is_dir():
+        import shutil
+        shutil.rmtree(brain_dir)
+        removed.append("✓ Project Brain Folder (.project_brain/) containing Tasks, Milestones, Handoffs, and PRDs")
+        
+    # Reset cached context in app memory if this was the active context
+    import app
+    if app._project_context and app._project_context._root == root:
+        app._project_context = None
+        
+    if not removed:
+        return f"No Project Brain configuration was found to reset at '{root}'."
+        
+    return (
+        f"### Project Brain Reset Complete at '{root}'\n\n"
+        "Removed:\n" + "\n".join(f"- {item}" for item in removed) + "\n\n"
+        "Source code, Git records, and project files remain untouched."
+    )
+
+
+@mcp.tool(
+    name="archive_project_brain",
+    description="Archive current Project Brain settings and context files to .project_brain_archive/ before a reset or pivot, preserving history.",
+)
+def archive_project_brain(path: str = ".") -> str:
+    """Move .project-context.json and .project_brain/ to an archive directory.
+    
+    Args:
+        path: Project root directory.
+    """
+    root = validate_path(path)
+    
+    context_file = root / ".project-context.json"
+    brain_dir = root / ".project_brain"
+    
+    if not context_file.is_file() and not brain_dir.is_dir():
+        return f"No Project Brain configuration exists at '{root}' to archive."
+        
+    import shutil
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    archive_root = root / ".project_brain_archive" / timestamp
+    archive_root.mkdir(parents=True, exist_ok=True)
+    
+    archived = []
+    
+    if context_file.is_file():
+        shutil.move(str(context_file), str(archive_root / ".project-context.json"))
+        archived.append("Context Store (.project-context.json)")
+        
+    if brain_dir.is_dir():
+        shutil.move(str(brain_dir), str(archive_root / ".project_brain"))
+        archived.append("Project Brain Directory (.project_brain/)")
+        
+    # Reset app context memory if it matches target root
+    import app
+    if app._project_context and app._project_context._root == root:
+        app._project_context = None
+        
+    return (
+        f"### Project Brain Archive Complete at '{root}'\n\n"
+        f"Moved metadata to `.project_brain_archive/{timestamp}/`:\n"
+        + "\n".join(f"- {item}" for item in archived) + "\n\n"
+        "You can now safely re-initialize or adopt the project fresh."
+    )
+
