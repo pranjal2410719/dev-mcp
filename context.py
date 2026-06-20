@@ -24,7 +24,7 @@ DEFAULT_CONTEXT: dict[str, Any] = {
     "project": {
         "name": "",
         "description": "",
-        "version": "0.1.0",
+        "version": "2.0.0",
         "created": "",
         "updated": "",
     },
@@ -66,6 +66,12 @@ DEFAULT_CONTEXT: dict[str, Any] = {
     "decisions": [
         # { "date": "2026-06-18", "decision": "...", "reason": "...", "alternatives": [] }
     ],
+    "open_design": {
+        "design_system": "",
+        "prototype_source": "",
+        "open_design_project": "",
+        "artifact_paths": [],
+    },
 }
 
 
@@ -284,6 +290,20 @@ class ProjectContext:
                 lines.append(f"- **{dec.get('date', '')}** — {dec.get('decision', '')}")
                 if dec.get("reason"):
                     lines.append(f"  - Why: {dec['reason']}")
+            lines.append("")
+
+        # Open Design Metadata
+        od = d.get("open_design", {})
+        if od and any(v for v in od.values() if v):
+            lines.append("## Open Design Metadata")
+            if od.get("design_system"):
+                lines.append(f"- **Design System:** {od['design_system']}")
+            if od.get("prototype_source"):
+                lines.append(f"- **Prototype Source:** {od['prototype_source']}")
+            if od.get("open_design_project"):
+                lines.append(f"- **Open Design Project:** {od['open_design_project']}")
+            if od.get("artifact_paths"):
+                lines.append(f"- **Artifact Paths:** {', '.join(od['artifact_paths'])}")
             lines.append("")
 
         return "\n".join(lines)

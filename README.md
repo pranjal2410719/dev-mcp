@@ -45,6 +45,14 @@ Or, while running the `dev-mcp` server interactively in your terminal, press `?`
 > **Complete User Manual Available**
 > For the comprehensive guide, including detailed setup, loops, slash commands, and a complete catalog of all 70 MCP tools with parameter signatures, see the **[docs/user_manual.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/user_manual.md)**.
 
+### 📚 Integration & Security Documentation
+
+For detailed integration guides and architecture specifications, refer to:
+- **[docs/security.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/security.md)**: Safety modes (`safe`, `trusted`, `lab`), Workspace Lock, and command blacklist controls.
+- **[docs/workspaces.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/workspaces.md)**: Sibling workspace directory layout and Project Brain isolation.
+- **[docs/open-design.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/open-design.md)**: Design-to-code integrations and Open Design metadata tracking.
+- **[docs/antigravity.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/antigravity.md)**: Connecting the server to the Google DeepMind Antigravity CLI.
+
 ---
 
 ## 👥 Author & Maintainer Profile

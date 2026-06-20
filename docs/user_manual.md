@@ -1,6 +1,6 @@
 # 🧠 dev-mcp: AI Engineering Operating System — User Manual & Developer Guide
 
-Welcome to the official User Manual and Developer Guide for **`dev-mcp` (Version 0.1.0)**. This document is a comprehensive guide to understanding, configuring, executing, and contributing to the `dev-mcp` Model Context Protocol (MCP) server.
+Welcome to the official User Manual and Developer Guide for **`dev-mcp` (Version 2.0.0)**. This document is a comprehensive guide to understanding, configuring, executing, and contributing to the `dev-mcp` Model Context Protocol (MCP) server.
 
 ---
 
@@ -137,6 +137,35 @@ The interface is tab-navigable using **Rich** layout panel controls:
 - **← / →** or **Tab**: Cycle between tabs.
 - **↑ / ↓**: Scroll within the active tab.
 - **esc / q**: Exit and return back to the server process.
+
+---
+
+## 🔒 4.2 AI Engineering OS Security & Multi-Agent Workspaces
+
+`dev-mcp` version 2.0.0 transitions the platform into a secure multi-agent workspace orchestrator. Key features include:
+
+### 1. Workspace Lock
+All file read/write operations and terminal command executions are jailed inside the active project root directory (CWD or loaded context root) when `safety_mode` is `safe` or `trusted`. Traversal escapes (`..` or writing to system folders) are blocked.
+
+### 2. Safety Modes
+Configurations inside `.project_brain/config.yaml` define safety bounds:
+- **`safe`** (default): Restricts folder modifications to project root, blocks system shell commands (`sudo`, `reboot`, etc.), blocks recursive file cleanups (`delete_recursive`), and blocks destructive git resets.
+- **`trusted`**: Limits execution to project root, but permits folder deletions and standard Git branch checkouts.
+- **`lab`**: Disables workspace locks and command block lists (recommended only in throwaway VM environments).
+
+### 3. Isolated Project Workspaces (`create_project_workspace`)
+Create new independent sibling workspaces without leaking main settings:
+```python
+create_project_workspace(name="saas-app", template="nextjs", path="./workspaces")
+```
+This tool initializes Git, writes the project brain structure, sets up PRD skeletons, and locks the safety mode of the new project workspace to `safe`.
+
+### 📚 4.3 Detailed Integration & Security Documentation
+For in-depth guides on specific v2.0.0 features, review the following files:
+- **[docs/security.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/security.md)**: Safety modes, jailing paths, and blocked command catalogs.
+- **[docs/workspaces.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/workspaces.md)**: Sibling workspace directory structures and context isolation.
+- **[docs/open-design.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/open-design.md)**: Design-to-code integrations and Open Design metadata tracking.
+- **[docs/antigravity.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/antigravity.md)**: Antigravity CLI host client connection settings.
 
 ---
 

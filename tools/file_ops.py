@@ -108,6 +108,16 @@ def delete_recursive(path: str) -> str:
         path: Relative or absolute path to the file/directory.
     """
     p = validate_path(path)
+    
+    # Restrict destructive operations under safe mode
+    from security import get_project_root_and_safety
+    _, safety_mode = get_project_root_and_safety()
+    if safety_mode == "safe":
+        raise PermissionError(
+            f"Action Blocked: 'delete_recursive' is forbidden under safety mode '{safety_mode}'. "
+            "Please upgrade the 'safety_mode' to 'trusted' or 'lab' in your .project_brain/config.yaml configuration to run destructive operations."
+        )
+
     if not p.exists():
         raise FileNotFoundError(f"Path not found: {p}")
     shutil.rmtree(p)

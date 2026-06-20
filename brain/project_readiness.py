@@ -414,6 +414,7 @@ def bootstrap_project(path: str = ".") -> str:
             "readiness_threshold: 80\n"
             "verification_threshold: 85\n"
             "auto_sync: true\n"
+            "safety_mode: safe\n"
         )
         config_file.write_text(cfg_yaml, encoding="utf-8")
         created.append(".project_brain/config.yaml (workspace config initialized)")
@@ -571,6 +572,7 @@ def adopt_existing_project(path: str = ".") -> str:
             "readiness_threshold: 80\n"
             "verification_threshold: 85\n"
             "auto_sync: true\n"
+            "safety_mode: safe\n"
         )
         config_file.write_text(cfg_yaml, encoding="utf-8")
         created.append(".project_brain/config.yaml")
@@ -890,5 +892,180 @@ def archive_project_brain(path: str = ".") -> str:
         f"Moved metadata to `.project_brain_archive/{timestamp}/`:\n"
         + "\n".join(f"- {item}" for item in archived) + "\n\n"
         "You can now safely re-initialize or adopt the project fresh."
+    )
+
+
+@mcp.tool(
+    name="create_project_workspace",
+    description="Create a new isolated project workspace directory, initialize git, bootstrap the project context/brain, and set up first milestone.",
+)
+def create_project_workspace(name: str, template: str = "blank", path: str = ".") -> str:
+    """Create a new project directory, initialize a Git repo, bootstrap the Project Brain structures,
+    and initialize the first milestone.
+
+    Args:
+        name: Name of the project directory to create.
+        template: Workspace template name ('blank', 'nextjs', or 'python').
+        path: Parent directory path (default is '.').
+    """
+    import subprocess
+    from datetime import datetime
+    from security import validate_path
+    from context import ProjectContext
+
+    # 1. Resolve parent and project directories
+    parent_dir = validate_path(path)
+    proj_dir = (parent_dir / name).resolve()
+    
+    if proj_dir.exists() and any(proj_dir.iterdir()):
+        raise ValueError(f"Directory '{proj_dir}' already exists and is not empty.")
+        
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    
+    # 2. Initialize Git
+    try:
+        subprocess.run(["git", "init", "-b", "main"], cwd=str(proj_dir), check=True, capture_output=True)
+    except Exception:
+        # Fallback to standard git init if -b main is not supported
+        try:
+            subprocess.run(["git", "init"], cwd=str(proj_dir), check=True, capture_output=True)
+        except Exception as git_err:
+            return f"Failed to initialize Git repository: {git_err}"
+            
+    # 3. Bootstrap the project brain files
+    bootstrap_msg = bootstrap_project(path=str(proj_dir))
+    
+    # 4. Customize context and files based on template
+    ctx = ProjectContext(proj_dir)
+    ctx.set("project.name", name)
+    ctx.set("project.version", "2.0.0")
+    ctx.set("project.created", datetime.now().isoformat())
+    
+    # Add default open_design metadata block
+    ctx.set("open_design", {
+        "design_system": "",
+        "prototype_source": "",
+        "open_design_project": "",
+        "artifact_paths": []
+    })
+    
+    # Apply templates
+    prd_path = proj_dir / ".project_brain" / "prd" / "PRD.md"
+    config_file = proj_dir / ".project_brain" / "config.yaml"
+    
+    if template.lower() == "nextjs":
+        ctx.set("tech_stack.languages", ["TypeScript", "JavaScript"])
+        ctx.set("tech_stack.frameworks", ["Next.js", "React"])
+        ctx.set("tech_stack.tools", ["npm", "tailwind"])
+        
+        # Next.js PRD customization
+        if prd_path.is_file():
+            prd_content = (
+                f"# Product Requirements Document: {name} (Next.js App)\n\n"
+                "## 1. Product Vision & Goals\n"
+                f"- Build a high-performance Next.js web application for {name}.\n"
+                "- Enforce clean React component structure, modern hooks, and Server Components.\n\n"
+                "## 2. Scope & Boundaries\n"
+                "- In Scope: Next.js pages, React components, Tailwind CSS styling.\n"
+                "- Out of Scope: Legacy state management like Redux.\n\n"
+                "## 3. Functional Requirements\n"
+                "- [ ] REQ-001: Implement a responsive dashboard UI with dark/light mode.\n"
+                "- [ ] REQ-002: Set up api route endpoints for data retrieval.\n\n"
+                "## 4. Technical Specifications\n"
+                "- Language: TypeScript\n"
+                "- Framework: Next.js (App Router)\n"
+                "- CSS: Tailwind CSS\n"
+            )
+            prd_path.write_text(prd_content, encoding="utf-8")
+            
+        # Update config.yaml
+        if config_file.is_file():
+            cfg_yaml = (
+                "project_type: auto\n"
+                "language: typescript\n"
+                "framework: nextjs\n"
+                "readiness_threshold: 80\n"
+                "verification_threshold: 85\n"
+                "auto_sync: true\n"
+                "safety_mode: safe\n"
+            )
+            config_file.write_text(cfg_yaml, encoding="utf-8")
+            
+    elif template.lower() == "python":
+        ctx.set("tech_stack.languages", ["Python"])
+        ctx.set("tech_stack.tools", ["pip", "venv"])
+        
+        # Python PRD customization
+        if prd_path.is_file():
+            prd_content = (
+                f"# Product Requirements Document: {name} (Python Project)\n\n"
+                "## 1. Product Vision & Goals\n"
+                f"- Build a robust Python utility / package for {name}.\n"
+                "- Focus on clean code, type hinting, and automated unit testing.\n\n"
+                "## 2. Scope & Boundaries\n"
+                "- In Scope: Core library modules, command-line interface (argparse), unittest/pytest suite.\n"
+                "- Out of Scope: Web interface (unless explicitly requested).\n\n"
+                "## 3. Functional Requirements\n"
+                "- [ ] REQ-001: Implement core utility functions with error validation.\n"
+                "- [ ] REQ-002: Add CLI script entrypoint to execute functions.\n\n"
+                "## 4. Technical Specifications\n"
+                "- Language: Python 3.10+\n"
+                "- Libraries: Standard library\n"
+            )
+            prd_path.write_text(prd_content, encoding="utf-8")
+            
+        # Update config.yaml
+        if config_file.is_file():
+            cfg_yaml = (
+                "project_type: auto\n"
+                "language: python\n"
+                "framework: none\n"
+                "readiness_threshold: 80\n"
+                "verification_threshold: 85\n"
+                "auto_sync: true\n"
+                "safety_mode: safe\n"
+            )
+            config_file.write_text(cfg_yaml, encoding="utf-8")
+            
+    else: # blank
+        # Update config.yaml with safety_mode
+        if config_file.is_file():
+            cfg_yaml = (
+                "project_type: auto\n"
+                "language: auto\n"
+                "framework: auto\n"
+                "readiness_threshold: 80\n"
+                "verification_threshold: 85\n"
+                "auto_sync: true\n"
+                "safety_mode: safe\n"
+            )
+            config_file.write_text(cfg_yaml, encoding="utf-8")
+            
+    ctx._save()
+    
+    # Create a README.md in new workspace
+    readme_file = proj_dir / "README.md"
+    if not readme_file.exists():
+        readme_content = (
+            f"# {name}\n\n"
+            f"This is the isolated project workspace for **{name}**, initialized via `dev-mcp` v2.0.0.\n\n"
+            "## Development Guides\n"
+            "This project uses a persistent **Project Brain** under `.project_brain/` to manage goals, requirements, tasks, and state handoffs.\n"
+        )
+        readme_file.write_text(readme_content, encoding="utf-8")
+
+    # Initial Git commit in new project
+    try:
+        subprocess.run(["git", "add", "."], cwd=str(proj_dir), check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "chore: initial project workspace setup"], cwd=str(proj_dir), check=True, capture_output=True)
+    except Exception:
+        pass
+        
+    return (
+        f"🤖 **Project Workspace '{name}' Successfully Created!**\n"
+        f"- Directory: {proj_dir}\n"
+        f"- Git repository initialized and initial commit created.\n"
+        f"- Project Brain bootstrapped (template PRD, context JSON, active.json tasks).\n"
+        f"- Template style applied: '{template}'\n"
     )
 
