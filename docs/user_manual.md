@@ -120,6 +120,26 @@ When executing inside `antigravity-cli`, developers have access to the following
 
 ---
 
+## 🕹️ 4.1 Interactive Keyboard Shortcut Guide (`dev-mcp-guide`)
+
+`dev-mcp` includes a built-in terminal-based interactive help guide. You can launch it directly in a shell using:
+```bash
+dev-mcp-guide
+```
+Alternatively, when running the `dev-mcp` server interactively in a terminal, press `?`, `h`, or `/` to temporarily suspend/overlay this guide directly from the running server process!
+
+The interface is tab-navigable using **Rich** layout panel controls:
+- **General**: Provides transport details, setup instructions, and quick configuration snippets for Claude Desktop, Cursor, and Windsurf.
+- **Commands**: Displays a structured list of all 70 MCP tools with detailed categorizations.
+- **Shortcuts**: Lists keyboard shortcut layouts for navigation, code editing, and dev-mcp specific tasks.
+
+### Guide Navigation Shortcuts:
+- **← / →** or **Tab**: Cycle between tabs.
+- **↑ / ↓**: Scroll within the active tab.
+- **esc / q**: Exit and return back to the server process.
+
+---
+
 ## 👑 5. The Onboarding & Execution Workflow
 
 `dev-mcp` operates around a linear project lifecycle, structured to prevent ad-hoc actions and ensure strict progress tracking:

@@ -19,6 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "fastmcp>=2.0.0",
+    "readchar>=4.0.0",
 ]
 
 [project.urls]
@@ -27,3 +28,4 @@ Repository = "https://github.com/pranjal2410719/dev-mcp"
 
 [project.scripts]
 dev-mcp = "server:main"
+dev-mcp-guide = "cli:main"

@@ -4,6 +4,43 @@
 
 Rather than treating the AI as a stateless code generator, `dev-mcp` establishes a persistent **Project Brain** in your workspace directory. This allows you to switch between different AI models and platforms seamlessly without losing context, project goals, tasks, or guidelines.
 
+## 🌟 Enhanced Startup Banner
+
+The server now displays an eye‑catching banner on startup, showcasing the FastMCP version and deployment information with rich styling. This banner appears before the interactive hint line.
+
+```bash
+# Example banner output
+╭──────────────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│                         ▄▀▀ ▄▀█ █▀▀ ▀█▀ █▀▄▀█ █▀▀ █▀█                        │
+│                         █▀  █▀█ ▄▄█  █  █ ▀ █ █▄▄ █▀▀                        │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                FastMCP 3.4.2                                 │
+│                            https://gofastmcp.com                             │
+│                                                                              │
+│                  🖥  Server:      dev-mcp, 3.4.2                              │
+│                  🚀 Deploy free: https://horizon.prefect.io                  │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```
+
+The banner is rendered using the `rich` library and can be customized by editing the `_print_banner` function in `server.py`.
+
+## 🕹️ Interactive Keyboard Shortcut Guide (`dev-mcp-guide`)
+
+`dev-mcp` now includes an interactive terminal-based guide showing transport settings, MCP commands, and keyboard shortcut configurations:
+```bash
+dev-mcp-guide
+```
+Or, while running the `dev-mcp` server interactively in your terminal, press `?`, `h`, or `/` to temporarily open/overlay the guide directly from the active server process!
+
+### Shortcuts:
+- **← / →** or **Tab**: Switch tabs (General, Commands, Shortcuts).
+- **↑ / ↓**: Scroll inside lists.
+- **esc / q**: Close guide and return to the server loop.
+
 > [!TIP]
 > **Complete User Manual Available**
 > For the comprehensive guide, including detailed setup, loops, slash commands, and a complete catalog of all 70 MCP tools with parameter signatures, see the **[docs/user_manual.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/user_manual.md)**.

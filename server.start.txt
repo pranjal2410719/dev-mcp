@@ -1,0 +1,3 @@
+cd /home/dev/Desktop/projects/mcp/dev-mcp
+source  .venv/bin/activate
+python server.py
