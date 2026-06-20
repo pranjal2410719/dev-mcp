@@ -4,6 +4,21 @@
 
 Rather than treating the AI as a stateless code generator, `dev-mcp` establishes a persistent **Project Brain** in your workspace directory. This allows you to switch between different AI models and platforms seamlessly without losing context, project goals, tasks, or guidelines.
 
+## 🏗️ Architecture
+
+```text
+  Antigravity
+       │
+       ▼
+(dev-mcp + Open Design)
+       │
+       ▼
+Project Workspace
+       │
+       ▼
+ Project Brain
+```
+
 ## 🌟 Enhanced Startup Banner
 
 The server now displays an eye‑catching banner on startup, showcasing the FastMCP version and deployment information with rich styling. This banner appears before the interactive hint line.
@@ -52,6 +67,8 @@ For detailed integration guides and architecture specifications, refer to:
 - **[docs/workspaces.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/workspaces.md)**: Sibling workspace directory layout and Project Brain isolation.
 - **[docs/open-design.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/open-design.md)**: Design-to-code integrations and Open Design metadata tracking.
 - **[docs/antigravity.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/antigravity.md)**: Connecting the server to the Google DeepMind Antigravity CLI.
+- **[docs/architecture-v2.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/architecture-v2.md)**: Architectural layout and multi-agent execution boundaries.
+- **[docs/release-notes-v2.0.0.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/release-notes-v2.0.0.md)**: Details of changes and new features introduced in `dev-mcp` v2.0.0.
 
 ---
 
