@@ -42,3 +42,10 @@ Welcome to the release notes for **`dev-mcp` v2.0.0**. This release represents a
 - Created a comprehensive test suite `tests/test_v2_features.py` validating safety modes, path traversal blocks, destructive file operations, and template creations.
 - Added git sandbox isolation inside tests to prevent running git commands from traversing up and resetting main repository configurations.
 - Verified that all unit tests and validation flows pass cleanly.
+
+---
+
+## 🗺️ Roadmap & Future Work (v2.1.0+)
+- **Native Open Design Bridge**: Deep design translation pipeline turning Figma/Open Design vector trees directly into customized React/HTML codebases.
+- **Dockerized Lab Sandboxing**: Seamlessly executing arbitrary commands inside temporary throwaway Docker containers under the `lab` safety level.
+- **Interactive Multi-Agent Orchestrator CLI**: Enhanced keyboard controls and dashboard overlays inside `dev-mcp-guide` to control safety boundaries dynamically.
