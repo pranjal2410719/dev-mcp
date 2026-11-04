@@ -21,7 +21,7 @@ For questions, community syncs, or active partnerships, feel free to reach out t
 
 ## 📐 Architecture Overview & Module Layout
 
-The codebase of `dev-mcp` is cleanly separated into three layers: **Core**, **Tools**, and **Brain**.
+The codebase of `dev-mcp` is cleanly separated into three layers: **Core**, **Tools**, and **Brain**, comprising **15 tool modules** and **71 registered MCP tools** (along with 2 resources and 4 prompts).
 
 ```mermaid
 graph TD
@@ -53,31 +53,31 @@ graph TD
 ```
 
 ### 1. Core Layer
-* **[server.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/server.py)**: The main execution script. It imports the FastMCP instance, triggers all tool registration imports, and boots the stdio event loop (`mcp.run()`).
-* **[app.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/app.py)**: Manages shared server state, registers the `dev-mcp` server, and hosts the context loader (`load_context`). The loader is designed to prevent cross-project state leakage by checking if the requested directory differs from the cached instance.
-* **[context.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/context.py)**: Implements the `ProjectContext` class, which manages key-value store transactions against `.project-context.json` using dot-notation, handles defaults, and generates markdown reports for LLM clients.
-* **[security.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/security.py)**: The security controller. Sanitizes paths and validates them against allowed sandboxed folders (CWD, home directory `$HOME`, or user-specified directories in `DEV_MCP_ALLOWED_DIRS`) to prevent directory traversal exploits.
+* **[server.py](server.py)**: The main execution script. Implements a dual-mode entrypoint: runs stdio JSON-RPC directly for MCP host clients in non-interactive pipe mode, or runs a background daemon server thread with an interactive `/dev/tty` shortcut listener and Rich ASCII banner in TTY mode.
+* **[app.py](app.py)**: Manages shared server state, initializes the `FastMCP` instance, and hosts the context loader (`load_context`). The loader prevents cross-project state leakage by detecting when the requested directory differs from the cached instance.
+* **[context.py](context.py)**: Implements the `ProjectContext` class, which manages key-value store transactions against `.project-context.json` using dot-notation, handles defaults, and generates markdown reports for LLM clients.
+* **[security.py](security.py)**: The security controller. Enforces Workspace Lock (strict jailing of file operations and paths to the active project root in `safe` and `trusted` modes), provides stack-inspected onboarding bypass for `bootstrap_project`, `create_project_workspace`, and `adopt_existing_project`, and implements 3 configurable safety modes (`safe`, `trusted`, `lab`).
 
-### 2. Tools Layer (Generic)
+### 2. Tools Layer (Generic — 28 Tools across 5 Modules)
 Stateless utility wrappers exposing standard operating system functions to the LLM:
-* **[tools/file_ops.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/tools/file_ops.py)**: Handles sandboxed file manipulation (read, write, edit, delete, directory listing, mkdir, glob).
-* **[tools/search.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/tools/search.py)**: Ripgrep-based code pattern search with a robust, pure-Python fallback search if `rg` is not installed on the system.
-* **[tools/terminal.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/tools/terminal.py)**: Safely runs local terminal commands with strict timeouts.
-* **[tools/git_ops.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/tools/git_ops.py)**: Operates local Git repositories (status, diffs, checkout branch, add, commit, branch creation).
-* **[tools/context_mgmt.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/tools/context_mgmt.py)**: Direct getters and setters to query, modify, add, and remove records in `.project-context.json`.
+* **[tools/file_ops.py](tools/file_ops.py)**: Handles sandboxed file manipulation (8 tools: `read_file`, `write_file`, `edit_file`, `delete_path`, `delete_recursive`, `list_directory`, `glob_files`, `create_directory`).
+* **[tools/search.py](tools/search.py)**: Ripgrep-based code pattern search with a robust, pure-Python fallback search if `rg` is not installed on the system (1 tool: `search_code`).
+* **[tools/terminal.py](tools/terminal.py)**: Safely runs local terminal commands with strict timeouts and pattern blocklists (1 tool: `run_command`).
+* **[tools/git_ops.py](tools/git_ops.py)**: Operates local Git repositories (7 tools: `git_status`, `git_diff`, `git_log`, `git_branch`, `git_add`, `git_commit`, `git_create_branch`).
+* **[tools/context_mgmt.py](tools/context_mgmt.py)**: Direct getters and setters to query, modify, add, and remove records in `.project-context.json` (11 tools: `init_context`, `get_context`, `update_context`, `add_to_context_list`, `add_key_file`, `add_task`, `add_decision`, `export_context_markdown`, `remove_context_item`, `reset_context`, `project_info`).
 
-### 3. Brain Layer (Project Operating System)
+### 3. Brain Layer (Project Operating System — 43 Tools across 10 Modules)
 Specialized PM algorithms driving the AI development lifecycle:
-* **[brain/project_readiness.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/brain/project_readiness.py)**: Evaluates codebase maturity (Levels 0-5), implements onboarding/migration generators (`bootstrap_project` and `adopt_existing_project`), runs diagnostics (`doctor`), and manages safe resets/archives.
-* **[brain/orchestrator.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/brain/orchestrator.py)**: Manages developer sprints (`start_session` and `end_session`), suggests conventional commit messages, and calculates dashboard recommendations.
-* **[brain/todo_engine.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/brain/todo_engine.py)**: Implements structured JSON task backlogs with phase bounds, priority weights, and task dependency blocks.
-* **[brain/phase_manager.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/brain/phase_manager.py)**: Scopes current target work through sequential phases (planning, implementation, alpha, beta) and tracks release milestones.
-* **[brain/prd_manager.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/brain/prd_manager.py)**: Writes, updates, and compares Product Requirements Documents (PRDs).
-* **[brain/requirements.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/brain/requirements.py)**: Extracts specifications into keywords, generates a requirements matrix, and maps requirements implementation percentage.
-* **[brain/sync_engine.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/brain/sync_engine.py)**: Matches physical files, Git logs, and active branch names to automated tasks, compiling reality verification confidence dossiers.
-* **[brain/handoff_engine.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/brain/handoff_engine.py)**: Formulates session summaries into files under `.project_brain/handoffs/` for seamless model transitions.
-* **[brain/guardian.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/brain/guardian.py)**: Enforces technology constraints by scanning imports against forbidden technologies (e.g. banning `firebase` or `redux`).
-* **[brain/dependency.py](file:///home/dev/Desktop/projects/mcp/dev-mcp/brain/dependency.py)**: Parses language imports to construct dependency graphs and conducts downstream impact analysis (blast radius audits).
+* **[brain/project_readiness.py](brain/project_readiness.py)**: Evaluates codebase maturity (Levels 0-5), implements onboarding/migration generators (`bootstrap_project`, `adopt_existing_project`, `create_project_workspace`), runs 7-layer health checks (`doctor`), and manages safe resets/archives (8 tools).
+* **[brain/orchestrator.py](brain/orchestrator.py)**: Manages developer sprints (`start_session`, `end_session`), suggests conventional commit messages (`prepare_commit`, `commit_changes`), and calculates dashboard recommendations (`next_best_action`, `generate_project_brain`) (6 tools).
+* **[brain/todo_engine.py](brain/todo_engine.py)**: Implements structured JSON task backlogs with phase bounds, priority weights, and task dependency blocks (6 tools: `create_task`, `update_task`, `complete_task`, `next_task`, `blocked_tasks`, `list_tasks`).
+* **[brain/phase_manager.py](brain/phase_manager.py)**: Scopes current target work through sequential phases (planning, implementation, alpha, beta) and tracks release milestones (7 tools: `get_current_phase`, `set_phase`, `complete_phase`, `next_phase`, `list_phases`, `add_milestone`, `list_milestones`).
+* **[brain/prd_manager.py](brain/prd_manager.py)**: Writes, updates, summarizes, and compares Product Requirements Documents (4 tools: `get_prd`, `update_prd`, `summarize_prd`, `compare_work_to_prd`).
+* **[brain/requirements.py](brain/requirements.py)**: Extracts specifications into keywords, generates a requirements matrix, and maps requirements implementation percentage and user outcomes (3 tools: `extract_requirements`, `verify_requirements`, `verify_outcome`).
+* **[brain/sync_engine.py](brain/sync_engine.py)**: Matches physical files, Git logs, and active branch names to automated tasks, compiling reality verification confidence dossiers and health scores (3 tools: `sync_workspace`, `verify_work`, `project_dashboard`).
+* **[brain/handoff_engine.py](brain/handoff_engine.py)**: Formulates session summaries into files under `.project_brain/handoffs/` for seamless model transitions (3 tools: `generate_handoff`, `get_last_handoff`, `list_handoffs`).
+* **[brain/guardian.py](brain/guardian.py)**: Enforces technology constraints by scanning imports against forbidden technologies (1 tool: `validate_architecture`).
+* **[brain/dependency.py](brain/dependency.py)**: Parses language imports to construct dependency graphs and conducts downstream impact analysis (2 tools: `build_dependency_graph`, `impact_analysis`).
 
 ---
 
@@ -136,14 +136,19 @@ Next, register your module by importing it inside `server.py` so it initializes 
 import tools.my_helper  # noqa: F401
 ```
 
-### 4. Running the Validation Pipeline
-Make sure to validate your changes before pushing them. The repository includes an E2E accuracy validation script that simulates onboarding, PRD requirements tracing, Git workflow commits, and sync engines:
+### 4. Running the Test Suite & Validation Pipeline
+Make sure to validate your changes before pushing them. The repository includes unit tests for v2 features (Workspace Lock, Safety Modes, Command Blocklist) and an E2E accuracy validation pipeline that simulates onboarding, PRD requirements tracing, Git workflow commits, and sync engines:
 
 ```bash
-.venv/bin/python tests/validate_mcp_flow.py
+# Run all unit and integration tests via unittest
+.venv/bin/python -m unittest discover -s tests -p "*.py" -v
+
+# Or run individual test suites
+.venv/bin/python -m unittest tests/test_v2_features.py
+.venv/bin/python -m unittest tests/validate_mcp_flow.py
 ```
 
-All contributions must pass these pipeline tests before submitting a Pull Request.
+All contributions must pass these tests with zero regressions before submitting a Pull Request.
 
 ### 5. Hot Reloading & Client Reconnections
 When editing tools or modifying server code, the active stdio pipe cached by your AI Client (e.g., Cursor, Claude Desktop) will go out of sync or throw EOF errors. 
@@ -160,7 +165,7 @@ Make sure to restart the MCP server in your client settings to force-load your m
 1. **Fork the repo** on GitHub.
 2. **Create a feature branch** (`git checkout -b feature/amazing-tool`).
 3. **Write your feature** and add relevant tests.
-4. **Run `python tests/validate_mcp_flow.py`** to ensure validation passes.
+4. **Run tests** (`.venv/bin/python -m unittest discover -s tests -p "*.py"`) to ensure all unit tests and validation pipelines pass.
 5. **Format your code** using standard formatting guidelines.
 6. **Commit changes** using Conventional Commits style (e.g., `feat(search): add fuzzy search matching`).
 7. **Submit a Pull Request** to the `main` branch.

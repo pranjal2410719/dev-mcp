@@ -29,3 +29,7 @@ Repository = "https://github.com/pranjal2410719/dev-mcp"
 [project.scripts]
 dev-mcp = "server:main"
 dev-mcp-guide = "cli:main"
+
+[tool.setuptools]
+packages = ["brain", "prompts", "resources", "tools"]
+py-modules = ["app", "cli", "context", "security", "server"]

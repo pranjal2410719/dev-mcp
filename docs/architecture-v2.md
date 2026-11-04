@@ -74,5 +74,20 @@ Security is enforced at the server's lowest validation layers to prevent destruc
 
 ### Safety Constraints Matrix
 1. **Workspace Lock**: In `safe` and `trusted` modes, paths are checked via `Path.relative_to(root)`. If a path escapes the root directory, a `PermissionError` is raised.
-2. **Command Blocklist**: Heavy regex audits filter command execution to reject relative traversal (`..`), system dangerous utilities (`sudo`, `mkfs`, `dd`, `shutdown`, `reboot`), and user absolute paths outside the workspace.
+2. **Command Blocklist**: Heavy regex audits filter command execution to reject relative traversal (`..`), system dangerous utilities (`sudo`, `mkfs`, `dd`, `shutdown`, `reboot`, `poweroff`, `init 0`), and user absolute paths outside the workspace (except system directories: `/bin`, `/usr/bin`, `/usr/lib`, `/lib`, `/etc/alternatives`, `/etc/ssl`).
 3. **Safe mode specific**: Blocks recursive deletion (`delete_recursive`), hard git resets (`git reset --hard`), and untracked cleans (`git clean -fd`).
+4. **Stack Inspection Bypass**: Python call-stack inspection (`inspect.stack()`) allows onboarding tools (`bootstrap_project`, `create_project_workspace`, and `adopt_existing_project`) to operate on parent and sibling directories outside the current workspace lock.
+
+---
+
+## ⚙️ 4. Server Runtime & Registered Capabilities
+
+- **Runtime**: FastMCP 3.4.2 application initialized in `app.py`.
+- **Dual-Mode Entrypoint (`server.py`)**:
+  - **Pipe Mode** (`not sys.stdin.isatty()`): Standard stdio JSON-RPC transport for MCP host clients (Antigravity, Cursor, Claude Desktop, Windsurf, Cline).
+  - **TTY Mode** (`sys.stdin.isatty()`): Starts FastMCP server in a background daemon thread, displays a Rich ASCII banner, and monitors `/dev/tty` for interactive shortcuts (`?`, `h`, `/` to launch the `cli.py` reference guide; `q`, `ESC` to quit).
+- **Capability Inventory (v2.0.0)**:
+  - **71 Registered Tools**: 28 tools across 5 tool modules (`file_ops`, `search`, `terminal`, `git_ops`, `context_mgmt`) and 43 tools across 10 brain modules (`prd_manager`, `phase_manager`, `todo_engine`, `handoff_engine`, `orchestrator`, `guardian`, `dependency`, `sync_engine`, `requirements`, `project_readiness`).
+  - **2 Registered Resources**: `project://context/json` and `project://context/markdown`.
+  - **4 Registered Prompts**: `project-overview`, `code-review`, `architectural-decision`, and `feature-plan`.
+- **Project Brain Architecture**: Stateful persistence layer backed by `.project-context.json` and `.project_brain/` (containing `config.yaml`, PRD markdown files, structured `requirements.json`, `phases/`, `todos/`, and `handoffs/`). State is dynamically loaded and isolated per workspace via `app.load_context()`.

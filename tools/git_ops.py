@@ -122,3 +122,48 @@ def git_create_branch(repo_path: str = ".", branch_name: str = "") -> str:
     if not branch_name:
         return "Error: branch_name is required."
     return _git_cmd(repo_path, "checkout", "-b", branch_name)
+
+
+@mcp.tool(
+    name="install_git_hooks",
+    description="Install automated pre-commit hook to sync Project Brain and context with native terminal git commits.",
+)
+def install_git_hooks(repo_path: str = ".", hook_type: str = "pre-commit") -> str:
+    """Install automated Git hook in the target repository to auto-sync .project_brain and context.
+
+    Args:
+        repo_path: Path to the git repository (defaults to project root).
+        hook_type: Hook to install ('pre-commit' or 'post-commit').
+    """
+    root = validate_path(repo_path)
+    git_dir = root / ".git"
+    if not git_dir.is_dir():
+        return f"Error: No .git directory found at '{root}'. Please initialize git first."
+
+    hooks_dir = git_dir / "hooks"
+    hooks_dir.mkdir(parents=True, exist_ok=True)
+    hook_file = hooks_dir / hook_type
+
+    hook_script = f"""#!/bin/sh
+# dev-mcp automated {hook_type} hook
+# Automatically syncs .project_brain and .project-context.json on git commits
+
+REPO_DIR="$(git rev-parse --show-toplevel)"
+cd "$REPO_DIR" || exit 1
+
+# Check if Project Brain or Context exists
+if [ -d ".project_brain" ] || [ -f ".project-context.json" ]; then
+    # Auto-stage Project Brain and Context files if they changed
+    git add .project_brain .project-context.json 2>/dev/null || true
+fi
+
+exit 0
+"""
+    try:
+        hook_file.write_text(hook_script, encoding="utf-8")
+        import os
+        os.chmod(hook_file, 0o755)
+        return f"✅ Successfully installed {hook_type} hook at: {hook_file.relative_to(root)}\nYour Project Brain will now stay synchronized with native terminal git commits."
+    except Exception as e:
+        return f"Failed to install git hook: {str(e)}"
+

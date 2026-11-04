@@ -36,8 +36,8 @@ To configure the Antigravity runtime to load `dev-mcp`, register the server path
 {
   "mcpServers": {
     "dev-mcp": {
-      "command": "/home/dev/Desktop/projects/mcp/dev-mcp/.venv/bin/python",
-      "args": ["/home/dev/Desktop/projects/mcp/dev-mcp/server.py"]
+      "command": "/path/to/dev-mcp/.venv/bin/python",
+      "args": ["/path/to/dev-mcp/server.py"]
     }
   }
 }
@@ -54,7 +54,11 @@ This launches Antigravity with sandbox protections enabled, automatically accept
 
 ## 💬 3. Standard Integration Commands
 
-When pair-programming with Antigravity, recommend the following slash commands to developers:
-- **`/goal`**: Start long-running, multi-step autonomous cycles.
-- **`/schedule`**: Set cron timers for workspace health syncs.
-- **`/grill-me`**: Review requirements specifications and architecture.
+> **Important Distinction:** Slash commands (e.g., `/goal`, `/schedule`, `/grill-me`, `/teamwork-preview`, `/learn`) are **host client features** of Google DeepMind's Antigravity CLI (`agy`), **not** MCP tools provided by `dev-mcp`. The `dev-mcp` server exposes 71 standard MCP tools (such as `create_task`, `sync_workspace`, `verify_work`, `bootstrap_project`), which the Antigravity agentic engine invokes autonomously during these sessions.
+
+When pair-programming with Antigravity, developers frequently use the following host slash commands:
+- **`/goal`**: Start long-running, multi-step autonomous development cycles.
+- **`/schedule`**: Set recurring schedules or cron timers for workspace health syncs.
+- **`/grill-me`**: Interactively review requirements specifications and challenge architecture decisions.
+- **`/teamwork-preview`**: Orchestrate multi-agent workflows and subagent task delegation.
+- **`/learn`**: Extract and persist domain knowledge into repository or agent memory.

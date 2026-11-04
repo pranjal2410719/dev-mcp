@@ -3,7 +3,8 @@ dev-mcp: A custom MCP server for managing, building, editing, and customizing pr
 
 This is the entry-point module.  It imports the FastMCP instance from ``app``,
 then imports all tool, prompt, resource, and brain modules so they register
-their decorators, and finally starts the server.
+their decorators (71 registered tools, 2 resources, and 4 prompts across 15 modules),
+and finally starts the server.
 
 Module organisation
 -------------------
@@ -12,17 +13,23 @@ Module organisation
     app.py                  FastMCP instance + shared global state
     security.py             Path-validation helpers
     context.py              ProjectContext data-store class
-    tools/                  10 existing generic tools
+    tools/                  28 existing generic tools across 5 modules
       file_ops.py           8 tools — read, write, edit, delete, list, glob, mkdir
       search.py             1 tool  — ripgrep-based code search
       terminal.py           1 tool  — shell command execution
       git_ops.py            7 tools — status, diff, log, branch, add, commit, create-branch
       context_mgmt.py      11 tools — context CRUD, tasks, decisions, project-info
-    brain/                  Project Brain — project operating system
+    brain/                  Project Brain — 43 tools across 10 modules
       prd_manager.py        4 tools — get/update/summarize/compare PRD
       phase_manager.py      7 tools — phase lifecycle, milestones
-      todo_engine.py        7 tools — structured tasks, deps, priorities
+      todo_engine.py        6 tools — structured tasks, deps, priorities
       handoff_engine.py     3 tools — AI handoff generation
+      orchestrator.py       6 tools — session lifecycle, project brain, commit flow
+      guardian.py           1 tool  — architectural rule validation
+      dependency.py         2 tools — dependency graph & blast radius impact analysis
+      sync_engine.py        3 tools — git reality sync, task verification, dashboard
+      requirements.py       3 tools — PRD requirement extraction, verification & outcome audit
+      project_readiness.py  8 tools — onboarding maturity, doctor, workspace creation
     prompts/
       definitions.py        4 prompts — overview, code-review, ADR, feature-plan
     resources/
@@ -31,33 +38,128 @@ Module organisation
 
 from __future__ import annotations
 
+import os
+import sys
+import importlib
+
 # ---------------------------------------------------------------------------
 # 1.  Import the FastMCP instance so it is available at module scope.
 # ---------------------------------------------------------------------------
 from app import mcp  # noqa: F401 — activates the instance
 
 # ---------------------------------------------------------------------------
-# 2.  Import all tool, prompt, resource, and brain modules.
-#     The import itself triggers @mcp.tool / @mcp.prompt / @mcp.resource
-#     decorators which register everything on the shared ``mcp`` instance.
+# 2.  Tool Profiles & Dynamic Module Registration
+#     Allows filtering tools via DEV_MCP_PROFILE to dramatically reduce
+#     LLM token consumption (e.g., DEV_MCP_PROFILE=code|planning|audit|desktop|all).
 # ---------------------------------------------------------------------------
-import tools.file_ops          # noqa: F401  — 8 file-operation tools
-import tools.search            # noqa: F401  — 1 code-search tool
-import tools.terminal          # noqa: F401  — 1 terminal tool
-import tools.git_ops           # noqa: F401  — 7 git tools
-import tools.context_mgmt      # noqa: F401  — 11 context + utility tools
-import brain.prd_manager       # noqa: F401  — 4 PRD tools
-import brain.phase_manager     # noqa: F401  — 7 phase/milestone tools
-import brain.todo_engine       # noqa: F401  — 7 task engine tools
-import brain.handoff_engine    # noqa: F401  — 3 handoff tools
-import brain.orchestrator      # noqa: F401  — 4 orchestration/session tools
-import brain.guardian          # noqa: F401  – 1 architecture validator
-import brain.dependency        # noqa: F401  — 2 dependency graph tools
-import brain.sync_engine       # noqa: F401  — 3 reality sync tools
-import brain.requirements      # noqa: F401  – 3 requirements traceability tools
-import brain.project_readiness # noqa: F401  – 3 project onboarding tools
-import prompts.definitions     # noqa: F401  — 4 prompt templates
-import resources.definitions   # noqa: F401  — 2 resources
+import importlib
+
+PROFILE_MODULES = {
+    "code": [
+        "tools.file_ops",
+        "tools.search",
+        "tools.terminal",
+        "tools.git_ops",
+        "tools.context_mgmt",
+        "brain.dependency",
+        "tools.desktop_ops",
+        "brain.orchestrator",
+        "prompts.definitions",
+        "resources.definitions",
+    ],
+    "planning": [
+        "brain.prd_manager",
+        "brain.phase_manager",
+        "brain.todo_engine",
+        "brain.requirements",
+        "brain.project_readiness",
+        "brain.handoff_engine",
+        "tools.context_mgmt",
+        "prompts.definitions",
+        "resources.definitions",
+    ],
+    "audit": [
+        "brain.sync_engine",
+        "brain.guardian",
+        "brain.dependency",
+        "brain.requirements",
+        "brain.project_readiness",
+        "tools.git_ops",
+        "tools.desktop_ops",
+        "prompts.definitions",
+        "resources.definitions",
+    ],
+    "desktop": [
+        "tools.desktop_ops",
+        "tools.file_ops",
+        "tools.terminal",
+        "tools.context_mgmt",
+        "prompts.definitions",
+        "resources.definitions",
+    ],
+    "all": [
+        "tools.file_ops",
+        "tools.search",
+        "tools.terminal",
+        "tools.git_ops",
+        "tools.context_mgmt",
+        "tools.desktop_ops",
+        "brain.prd_manager",
+        "brain.phase_manager",
+        "brain.todo_engine",
+        "brain.handoff_engine",
+        "brain.orchestrator",
+        "brain.guardian",
+        "brain.dependency",
+        "brain.sync_engine",
+        "brain.requirements",
+        "brain.project_readiness",
+        "prompts.definitions",
+        "resources.definitions",
+    ],
+}
+
+
+def _resolve_profile_modules() -> tuple[str, list[str]]:
+    profile_env = os.environ.get("DEV_MCP_PROFILE", "all").lower().strip()
+    if profile_env in PROFILE_MODULES:
+        return profile_env, PROFILE_MODULES[profile_env]
+
+    selected_modules = set()
+    parts = [p.strip() for p in profile_env.split(",") if p.strip()]
+    for part in parts:
+        if part in PROFILE_MODULES:
+            selected_modules.update(PROFILE_MODULES[part])
+        elif part.startswith("tools.") or part.startswith("brain."):
+            selected_modules.add(part)
+
+    if selected_modules:
+        selected_modules.add("prompts.definitions")
+        selected_modules.add("resources.definitions")
+        return profile_env, sorted(list(selected_modules))
+
+    return "all", PROFILE_MODULES["all"]
+
+
+ACTIVE_PROFILE, MODULES_TO_LOAD = _resolve_profile_modules()
+LOADED_MODULES: list[str] = []
+
+for mod_name in MODULES_TO_LOAD:
+    try:
+        importlib.import_module(mod_name)
+        LOADED_MODULES.append(mod_name)
+    except Exception as e:
+        sys.stderr.write(f"Warning: Failed to import {mod_name}: {e}\n")
+
+
+@mcp.tool(
+    name="get_dev_mcp_profile",
+    description="Get the active dev-mcp tool profile and registered module count.",
+)
+def get_dev_mcp_profile() -> str:
+    """Return active profile name and registered module list."""
+    return f"Active dev-mcp Profile: '{ACTIVE_PROFILE}' (loaded {len(LOADED_MODULES)} modules: {', '.join(LOADED_MODULES)})."
+
 
 # ---------------------------------------------------------------------------
 # 3.  Entry point.
@@ -74,7 +176,8 @@ from rich.align import Align
 
 def _print_banner() -> None:
     """Render the attractive startup banner with ASCII art and server info."""
-    ascii_art = """
+    profile_info = f"profile: {ACTIVE_PROFILE} ({len(LOADED_MODULES)} modules)"
+    ascii_art = f"""
 ╭──────────────────────────────────────────────────────────────────────────────╮
 │                                                                              │
 │                         ▄▀▀ ▄▀█ █▀▀ ▀█▀ █▀▄▀█ █▀▀ █▀█                        │
@@ -85,7 +188,7 @@ def _print_banner() -> None:
 │                                FastMCP 3.4.2                                 │
 │                            https://gofastmcp.com                             │
 │                                                                              │
-│                  🖥  Server:      dev-mcp, 3.4.2                              │
+│                  🖥  Server:      dev-mcp, 3.4.2 ({profile_info})            │
 │                  🚀 Deploy free: https://horizon.prefect.io                  │
 │                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────╯

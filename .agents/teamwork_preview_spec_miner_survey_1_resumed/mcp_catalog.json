@@ -1,0 +1,1245 @@
+{
+  "server_name": "dev-mcp",
+  "tool_count": 71,
+  "tools": {
+    "read_file": {
+      "description": "Read the contents of a file at the given path.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Relative or absolute path to the file.",
+          "default": null,
+          "required": true
+        }
+      }
+    },
+    "write_file": {
+      "description": "Write content to a file, creating it if it doesn't exist.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Relative or absolute path to the file.",
+          "default": null,
+          "required": true
+        },
+        "content": {
+          "type": "string",
+          "description": "The text content to write.",
+          "default": null,
+          "required": true
+        }
+      }
+    },
+    "edit_file": {
+      "description": "Edit a file by replacing an exact string with a new string. Use this for targeted code changes instead of rewriting the whole file.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Relative or absolute path to the file.",
+          "default": null,
+          "required": true
+        },
+        "old_string": {
+          "type": "string",
+          "description": "The exact string to find (case-sensitive, whitespace-sensitive).",
+          "default": null,
+          "required": true
+        },
+        "new_string": {
+          "type": "string",
+          "description": "The replacement string.",
+          "default": null,
+          "required": true
+        }
+      }
+    },
+    "delete_path": {
+      "description": "Delete a file or an empty directory.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Relative or absolute path to the file/directory.",
+          "default": null,
+          "required": true
+        }
+      }
+    },
+    "delete_recursive": {
+      "description": "Recursively delete a file or directory tree. Use with caution.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Relative or absolute path to the file/directory.",
+          "default": null,
+          "required": true
+        }
+      }
+    },
+    "list_directory": {
+      "description": "List files and directories inside a given directory.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Relative or absolute path to the directory.",
+          "default": null,
+          "required": true
+        }
+      }
+    },
+    "glob_files": {
+      "description": "Find files matching a glob pattern (e.g. '**/*.ts', 'src/**/*.py').",
+      "parameters": {
+        "pattern": {
+          "type": "string",
+          "description": "Glob pattern (e.g. '**/*.py', 'src/**/*.ts', '*.json').",
+          "default": null,
+          "required": true
+        },
+        "base_path": {
+          "type": "string",
+          "description": "Directory to search from (default: current directory).",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "create_directory": {
+      "description": "Create one or more directories (like mkdir -p).",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Relative or absolute path to the directory.",
+          "default": null,
+          "required": true
+        }
+      }
+    },
+    "search_code": {
+      "description": "Search for a text pattern across files in the project using ripgrep-like search.",
+      "parameters": {
+        "pattern": {
+          "type": "string",
+          "description": "The text or regex pattern to search for.",
+          "default": null,
+          "required": true
+        },
+        "path": {
+          "type": "string",
+          "description": "Directory to search in.",
+          "default": ".",
+          "required": false
+        },
+        "glob_filter": {
+          "type": "any",
+          "description": "Optional file pattern filter (e.g. '*.py', '*.ts', '*.{ts,js}').",
+          "default": null,
+          "required": false
+        },
+        "max_results": {
+          "type": "integer",
+          "description": "Maximum number of result lines to return.",
+          "default": 50,
+          "required": false
+        }
+      }
+    },
+    "run_command": {
+      "description": "Run a shell command and return its output. Always set a reasonable timeout. Avoid destructive commands (rm -rf, etc.).",
+      "parameters": {
+        "command": {
+          "type": "string",
+          "description": "The shell command to run.",
+          "default": null,
+          "required": true
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum seconds to wait (default 60, max 300).",
+          "default": 60,
+          "required": false
+        },
+        "workdir": {
+          "type": "any",
+          "description": "Working directory for the command (default: server CWD).",
+          "default": null,
+          "required": false
+        }
+      }
+    },
+    "git_status": {
+      "description": "Show the working tree status (git status).",
+      "parameters": {
+        "repo_path": {
+          "type": "string",
+          "description": "Path to the git repository.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "git_diff": {
+      "description": "Show staged and unstaged changes (git diff).",
+      "parameters": {
+        "repo_path": {
+          "type": "string",
+          "description": "Path to the git repository.",
+          "default": ".",
+          "required": false
+        },
+        "staged": {
+          "type": "boolean",
+          "description": "If True, show only staged changes (git diff --cached).",
+          "default": false,
+          "required": false
+        }
+      }
+    },
+    "git_log": {
+      "description": "Show recent commit history (git log).",
+      "parameters": {
+        "repo_path": {
+          "type": "string",
+          "description": "Path to the git repository.",
+          "default": ".",
+          "required": false
+        },
+        "max_count": {
+          "type": "integer",
+          "description": "Maximum number of commits to show.",
+          "default": 10,
+          "required": false
+        }
+      }
+    },
+    "git_branch": {
+      "description": "List local branches (git branch).",
+      "parameters": {
+        "repo_path": {
+          "type": "string",
+          "description": "Path to the git repository.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "git_add": {
+      "description": "Stage file(s) for commit (git add).",
+      "parameters": {
+        "repo_path": {
+          "type": "string",
+          "description": "Path to the git repository.",
+          "default": ".",
+          "required": false
+        },
+        "files": {
+          "type": "string",
+          "description": "File(s) to stage (space-separated, or '.' for all).",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "git_commit": {
+      "description": "Commit staged changes with a message (git commit).",
+      "parameters": {
+        "repo_path": {
+          "type": "string",
+          "description": "Path to the git repository.",
+          "default": ".",
+          "required": false
+        },
+        "message": {
+          "type": "string",
+          "description": "Commit message.",
+          "default": "update",
+          "required": false
+        }
+      }
+    },
+    "git_create_branch": {
+      "description": "Create and switch to a new git branch (git checkout -b).",
+      "parameters": {
+        "repo_path": {
+          "type": "string",
+          "description": "Path to the git repository.",
+          "default": ".",
+          "required": false
+        },
+        "branch_name": {
+          "type": "string",
+          "description": "Name for the new branch.",
+          "default": "",
+          "required": false
+        }
+      }
+    },
+    "init_context": {
+      "description": "Initialize or auto-detect project context. Scans project files to detect tech stack, languages, and frameworks.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "get_context": {
+      "description": "Get the full project context as formatted text. Optionally filter by dot path (e.g. 'tech_stack.languages').",
+      "parameters": {
+        "dot_path": {
+          "type": "string",
+          "description": "Optional dot-notation path to get a specific field\n      (e.g. 'project.name', 'tech_stack.languages').\n      Leave empty to get the entire context.",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "update_context": {
+      "description": "Update a specific field in the project context using dot notation (e.g. 'project.description', 'conventions.code_style').",
+      "parameters": {
+        "dot_path": {
+          "type": "string",
+          "description": "Dot-notation path to the field (e.g. 'project.description').",
+          "default": null,
+          "required": true
+        },
+        "value": {
+          "type": "string",
+          "description": "The value to set.",
+          "default": null,
+          "required": true
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "add_to_context_list": {
+      "description": "Add an item to a list field in the context (e.g. tech_stack.languages, key_files, active_tasks, goals).",
+      "parameters": {
+        "dot_path": {
+          "type": "string",
+          "description": "Path to the list field.",
+          "default": null,
+          "required": true
+        },
+        "item": {
+          "type": "string",
+          "description": "Item to add (string, or JSON for complex items).",
+          "default": null,
+          "required": true
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "add_key_file": {
+      "description": "Register a key file with its purpose in the project context.",
+      "parameters": {
+        "file_path": {
+          "type": "string",
+          "description": "Path to the file (relative to project root).",
+          "default": null,
+          "required": true
+        },
+        "purpose": {
+          "type": "string",
+          "description": "What this file does (one sentence).",
+          "default": null,
+          "required": true
+        },
+        "details": {
+          "type": "string",
+          "description": "Optional extended notes about the file.",
+          "default": "",
+          "required": false
+        },
+        "root_path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "add_task": {
+      "description": "Add an active task to the project context.",
+      "parameters": {
+        "task_id": {
+          "type": "string",
+          "description": "Unique identifier (e.g. 'TASK-1', 'feat-auth').",
+          "default": null,
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "description": "What needs to be done.",
+          "default": null,
+          "required": true
+        },
+        "status": {
+          "type": "string",
+          "description": "One of: pending, in_progress, blocked, completed.",
+          "default": "pending",
+          "required": false
+        },
+        "branch": {
+          "type": "string",
+          "description": "Optional git branch name.",
+          "default": "",
+          "required": false
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes.",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "add_decision": {
+      "description": "Log an architecture decision record (ADR) in the project context.",
+      "parameters": {
+        "decision": {
+          "type": "string",
+          "description": "What was decided.",
+          "default": null,
+          "required": true
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why this decision was made.",
+          "default": null,
+          "required": true
+        },
+        "alternatives": {
+          "type": "string",
+          "description": "Other options that were considered.",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "export_context_markdown": {
+      "description": "Export the project context as a Markdown document for sharing with other LLMs and AI tools.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "remove_context_item": {
+      "description": "Remove an item from a list in the project context by index.",
+      "parameters": {
+        "dot_path": {
+          "type": "string",
+          "description": "Path to the list (e.g. 'active_tasks', 'key_files').",
+          "default": null,
+          "required": true
+        },
+        "index": {
+          "type": "integer",
+          "description": "Zero-based index of the item to remove.",
+          "default": null,
+          "required": true
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "reset_context": {
+      "description": "Reset the project context to default values (clears all data).",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "project_info": {
+      "description": "Get information about the current project environment.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "get_prd": {
+      "description": "Retrieve a PRD document (PRD, VISION, SCOPE, REQUIREMENTS). Returns the content of the specified document.",
+      "parameters": {
+        "document": {
+          "type": "string",
+          "description": "Which document to read \u2014 PRD, VISION, SCOPE, or REQUIREMENTS.",
+          "default": "PRD",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "update_prd": {
+      "description": "Create or update a PRD document (PRD, VISION, SCOPE, REQUIREMENTS).",
+      "parameters": {
+        "document": {
+          "type": "string",
+          "description": "Which document to write \u2014 PRD, VISION, SCOPE, or REQUIREMENTS.",
+          "default": null,
+          "required": true
+        },
+        "content": {
+          "type": "string",
+          "description": "The full markdown content of the document.",
+          "default": null,
+          "required": true
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "summarize_prd": {
+      "description": "Summarize key requirements from PRD documents into a concise bullet list.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "compare_work_to_prd": {
+      "description": "Compare current project context and tasks against PRD requirements to check alignment.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "get_current_phase": {
+      "description": "Get the current active phase and its status.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "set_phase": {
+      "description": "Set the current active development phase. Only tasks in this phase are considered 'in scope'.",
+      "parameters": {
+        "phase_name": {
+          "type": "string",
+          "description": "Name of the phase (e.g. 'Phase 4 \u2014 Activity Creation').",
+          "default": null,
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "description": "What this phase involves.",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "complete_phase": {
+      "description": "Mark the current phase as completed and optionally advance to the next phase.",
+      "parameters": {
+        "notes": {
+          "type": "string",
+          "description": "Summary of what was accomplished in this phase.",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "next_phase": {
+      "description": "Mark current phase as complete and advance to the next phase in sequence.",
+      "parameters": {
+        "phase_name": {
+          "type": "string",
+          "description": "Name of the next phase.",
+          "default": null,
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "description": "What the next phase involves.",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "list_phases": {
+      "description": "List all phases and their status (completed, active, pending).",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "add_milestone": {
+      "description": "Define a milestone with a target date and associated features.",
+      "parameters": {
+        "name": {
+          "type": "string",
+          "description": "Milestone name (e.g. 'v1.0 Beta').",
+          "default": null,
+          "required": true
+        },
+        "target_date": {
+          "type": "string",
+          "description": "Target completion date.",
+          "default": "",
+          "required": false
+        },
+        "features": {
+          "type": "string",
+          "description": "Comma-separated list of key features for this milestone.",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "list_milestones": {
+      "description": "Show all milestones and their status.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "create_task": {
+      "description": "Create a new task with phase, priority, dependencies, and description.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "description": "Short task title.",
+          "default": null,
+          "required": true
+        },
+        "phase": {
+          "type": "string",
+          "description": "Which phase this task belongs to (leave empty for current phase).",
+          "default": "",
+          "required": false
+        },
+        "priority": {
+          "type": "string",
+          "description": "One of: critical, high, medium, low.",
+          "default": "medium",
+          "required": false
+        },
+        "depends_on": {
+          "type": "string",
+          "description": "Comma-separated task IDs that must be completed first.",
+          "default": "",
+          "required": false
+        },
+        "description": {
+          "type": "string",
+          "description": "Longer description / acceptance criteria.",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "update_task": {
+      "description": "Update a task's status, priority, or description by ID.",
+      "parameters": {
+        "task_id": {
+          "type": "string",
+          "description": "The task ID (e.g. TASK-0001).",
+          "default": null,
+          "required": true
+        },
+        "status": {
+          "type": "string",
+          "description": "One of: pending, in_progress, blocked, completed, cancelled.",
+          "default": "",
+          "required": false
+        },
+        "priority": {
+          "type": "string",
+          "description": "One of: critical, high, medium, low.",
+          "default": "",
+          "required": false
+        },
+        "title": {
+          "type": "string",
+          "description": "New title (if changing).",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "complete_task": {
+      "description": "Mark a task as completed with optional notes.",
+      "parameters": {
+        "task_id": {
+          "type": "string",
+          "description": "The task ID to complete.",
+          "default": null,
+          "required": true
+        },
+        "notes": {
+          "type": "string",
+          "description": "Completion notes.",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "next_task": {
+      "description": "Get the highest-priority task that is ready to work on (dependencies met, current phase).",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "blocked_tasks": {
+      "description": "List all tasks that are blocked, either by dependencies or explicitly.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "list_tasks": {
+      "description": "List all active tasks, optionally filtered by phase or status.",
+      "parameters": {
+        "phase": {
+          "type": "string",
+          "description": "Filter by phase name.",
+          "default": "",
+          "required": false
+        },
+        "status": {
+          "type": "string",
+          "description": "Filter by status (pending, in_progress, blocked, completed).",
+          "default": "",
+          "required": false
+        },
+        "priority": {
+          "type": "string",
+          "description": "Filter by priority (critical, high, medium, low).",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "generate_handoff": {
+      "description": "Generate a session summary capturing what was done, what's next, and current project state for handoff to another AI.",
+      "parameters": {
+        "session_summary": {
+          "type": "string",
+          "description": "Brief summary of what was accomplished this session.",
+          "default": "",
+          "required": false
+        },
+        "known_issues": {
+          "type": "string",
+          "description": "Any bugs or issues the next session should know about.",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "get_last_handoff": {
+      "description": "Retrieve the most recent AI handoff document so a new AI session has full context.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "list_handoffs": {
+      "description": "List all AI session handoffs with dates.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "generate_project_brain": {
+      "description": "Generate a complete aggregated Project Brain dashboard showing current status, phase, active/blocked tasks, recent changes, and recommendations.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "next_best_action": {
+      "description": "Intelligently calculate and recommend the next best task to work on based on phase, priority, dependencies, and file hints.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "start_session": {
+      "description": "Start a development session. Loads state, PRD, active tasks, and latest handoff to generate a detailed Session Brief for the AI.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "end_session": {
+      "description": "End the current session, update progress, and generate a handoff file (does not auto-commit changes).",
+      "parameters": {
+        "session_summary": {
+          "type": "string",
+          "description": "",
+          "default": null,
+          "required": true
+        },
+        "known_issues": {
+          "type": "string",
+          "description": "",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "prepare_commit": {
+      "description": "Analyze modified workspace files and generate a suggested conventional git commit message and summary for approval.",
+      "parameters": {
+        "session_summary": {
+          "type": "string",
+          "description": "",
+          "default": null,
+          "required": true
+        },
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "commit_changes": {
+      "description": "Stage all workspace changes and commit them to Git with the approved commit message.",
+      "parameters": {
+        "message": {
+          "type": "string",
+          "description": "",
+          "default": null,
+          "required": true
+        },
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "validate_architecture": {
+      "description": "Scan the codebase and validate imports/technologies against the project's architectural guidelines and forbidden tools.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "build_dependency_graph": {
+      "description": "Scan files and construct a complete mapping of dependencies and references in the project.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "impact_analysis": {
+      "description": "Calculate direct and transitive downstream files affected if a given file is modified.",
+      "parameters": {
+        "file_path": {
+          "type": "string",
+          "description": "",
+          "default": null,
+          "required": true
+        },
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "sync_workspace": {
+      "description": "Scan the physical workspace (Git diff, new files, current branch, commits) and compare to the Todo plan to auto-detect finished work.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "verify_work": {
+      "description": "Perform deep sanity, test, git diff, and architecture checks against a task to output a reality verification dossier.",
+      "parameters": {
+        "task_id": {
+          "type": "string",
+          "description": "",
+          "default": null,
+          "required": true
+        },
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "project_dashboard": {
+      "description": "Generate a unified Project Manager Dashboard combining phase state, todo progress, git status, architecture violations, and a project health score.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "extract_requirements": {
+      "description": "Parse PRD markdown files to extract structured requirements and save them into requirements.json.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "verify_requirements": {
+      "description": "Scan codebase to map requirement keywords and verify their implementation status and feature coverage.",
+      "parameters": {
+        "feature_name": {
+          "type": "string",
+          "description": "",
+          "default": "",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "verify_outcome": {
+      "description": "Perform outcome audits verifying user flows, business goals, and objective completion based on target tasks.",
+      "parameters": {
+        "task_id": {
+          "type": "string",
+          "description": "",
+          "default": null,
+          "required": true
+        },
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "assess_project_readiness": {
+      "description": "Scan the workspace and evaluate its onboarding readiness score (0-100%) against required Project Brain documents.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "project_readiness_report": {
+      "description": "Generate a formatted Markdown project readiness report showing missing files, scoring audit, and recommended actions.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "bootstrap_project": {
+      "description": "Auto-generate template files and directories (PRD, milestones, active tasks, config yaml) to instantly onboard an unknown repository.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "adopt_existing_project": {
+      "description": "Scan an existing legacy codebase (directories, package lists, readmes) and generate context, PRDs, milestones, and audit tasks.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "doctor": {
+      "description": "Check the diagnostic health and configuration integrity of the Project Brain and MCP server.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "reset_project_brain": {
+      "description": "Wipe all Project Brain configuration, tasks, and context metadata inside the selected project. Leaves git and source code untouched.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "archive_project_brain": {
+      "description": "Archive current Project Brain settings and context files to .project_brain_archive/ before a reset or pivot, preserving history.",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Project root directory.",
+          "default": ".",
+          "required": false
+        }
+      }
+    },
+    "create_project_workspace": {
+      "description": "Create a new isolated project workspace directory, initialize git, bootstrap the project context/brain, and set up first milestone.",
+      "parameters": {
+        "name": {
+          "type": "string",
+          "description": "Name of the project directory to create.",
+          "default": null,
+          "required": true
+        },
+        "template": {
+          "type": "string",
+          "description": "Workspace template name ('blank', 'nextjs', or 'python').",
+          "default": "blank",
+          "required": false
+        },
+        "path": {
+          "type": "string",
+          "description": "Parent directory path (default is '.').",
+          "default": ".",
+          "required": false
+        }
+      }
+    }
+  },
+  "resource_count": 2,
+  "resources": {
+    "project://context/json": {
+      "name": "Project Context (JSON)",
+      "description": "The full project context document as JSON.",
+      "mimeType": null
+    },
+    "project://context/markdown": {
+      "name": "Project Context (Markdown)",
+      "description": "The full project context as a Markdown document for sharing.",
+      "mimeType": null
+    }
+  },
+  "prompt_count": 4,
+  "prompts": {
+    "project-overview": {
+      "description": "A complete project overview prompt that injects the full project context for AI assistants.",
+      "arguments": [
+        {
+          "name": "path",
+          "description": "Project root directory.\n\nProvide as a JSON string matching the following schema: {\"type\":\"string\"}",
+          "required": false
+        }
+      ]
+    },
+    "code-review": {
+      "description": "Code review guidelines specific to this project's conventions and tech stack.",
+      "arguments": [
+        {
+          "name": "path",
+          "description": "Project root directory.\n\nProvide as a JSON string matching the following schema: {\"type\":\"string\"}",
+          "required": false
+        }
+      ]
+    },
+    "architectural-decision": {
+      "description": "Template for recording an Architecture Decision Record (ADR).",
+      "arguments": []
+    },
+    "feature-plan": {
+      "description": "Template for planning a new feature with tasks, branch strategy, and milestones.",
+      "arguments": []
+    }
+  }
+}

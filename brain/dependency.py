@@ -87,16 +87,26 @@ def _resolve_python_import(source_file: Path, import_str: str, root: Path) -> Pa
     return None
 
 
-def _get_graph(root: Path) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
-    """Scan root files and build adjacency lists: dependencies (outgoing) and dependents (incoming)."""
+# In-memory mtime cache to avoid re-reading and re-parsing unchanged files
+# Key: canonical file path, Value: (mtime, list_of_raw_imports)
+_FILE_PARSE_CACHE: dict[str, tuple[float, list[str]]] = {}
+
+# Graph-level cache: key is root string, value is (cache_timestamp, dependencies, dependents)
+_ROOT_GRAPH_CACHE: dict[str, tuple[float, dict[str, list[str]], dict[str, list[str]]]] = {}
+
+
+def _get_graph(root: Path, force_refresh: bool = False) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    """Scan root files and build adjacency lists: dependencies (outgoing) and dependents (incoming).
+    
+    Uses mtime-based in-memory caching to eliminate disk reads and regex overhead on unchanged files.
+    """
     dependencies: dict[str, list[str]] = {}
     dependents: dict[str, list[str]] = {}
     
     js_import_re = re.compile(r'\b(?:import\s+.*\s+from\s+[\'"]([^\'"]+)[\'"]|require\([\'"]([^\'"]+)[\'"]\))')
     py_import_re = re.compile(r'\b(?:import\s+([\w\.]+)|from\s+([\w\.]+)\s+import)')
     
-    # Pre-populate dictionaries for all scanned files
-    all_files = []
+    all_files: list[tuple[Path, str, str, float]] = []
     
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in IGNORE_DIRS and not d.startswith(".")]
@@ -107,35 +117,54 @@ def _get_graph(root: Path) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
             if suffix not in (".py", ".ts", ".tsx", ".js", ".jsx"):
                 continue
             rel = str(file_path.relative_to(root))
-            all_files.append((file_path, rel, suffix))
+            try:
+                mtime = file_path.stat().st_mtime
+            except OSError:
+                continue
+            all_files.append((file_path, rel, suffix, mtime))
             dependencies[rel] = []
             dependents[rel] = []
             
-    # Parse each file
-    for file_path, rel, suffix in all_files:
-        try:
-            content = file_path.read_text(encoding="utf-8", errors="ignore")
-        except Exception:
-            continue
-            
-        targets = []
+    # Parse each file using mtime cache
+    for file_path, rel, suffix, mtime in all_files:
+        canonical_key = str(file_path.resolve())
+        cached_entry = _FILE_PARSE_CACHE.get(canonical_key)
         
+        if cached_entry is not None and cached_entry[0] == mtime and not force_refresh:
+            raw_imports = cached_entry[1]
+        else:
+            try:
+                content = file_path.read_text(encoding="utf-8", errors="ignore")
+            except Exception:
+                continue
+                
+            raw_imports = []
+            if suffix in (".js", ".jsx", ".ts", ".tsx"):
+                for match in js_import_re.finditer(content):
+                    imp = match.group(1) or match.group(2)
+                    if imp:
+                        raw_imports.append(imp)
+            elif suffix == ".py":
+                for match in py_import_re.finditer(content):
+                    imp = match.group(1) or match.group(2)
+                    if imp:
+                        raw_imports.append(imp)
+                        
+            _FILE_PARSE_CACHE[canonical_key] = (mtime, raw_imports)
+            
+        # Resolve imports to relative paths
+        targets: list[str] = []
         if suffix in (".js", ".jsx", ".ts", ".tsx"):
-            for match in js_import_re.finditer(content):
-                imp = match.group(1) or match.group(2)
-                if imp:
-                    resolved = _resolve_js_ts_import(file_path, imp, root)
-                    if resolved:
-                        targets.append(str(resolved))
-                        
+            for imp in raw_imports:
+                resolved = _resolve_js_ts_import(file_path, imp, root)
+                if resolved:
+                    targets.append(str(resolved))
         elif suffix == ".py":
-            for match in py_import_re.finditer(content):
-                imp = match.group(1) or match.group(2)
-                if imp:
-                    resolved = _resolve_python_import(file_path, imp, root)
-                    if resolved:
-                        targets.append(str(resolved))
-                        
+            for imp in raw_imports:
+                resolved = _resolve_python_import(file_path, imp, root)
+                if resolved:
+                    targets.append(str(resolved))
+                    
         # Save unique edges
         for t in set(targets):
             if t != rel and t in dependencies:  # ensure it exists in project
@@ -203,27 +232,61 @@ def impact_analysis(file_path: str, path: str = ".") -> str:
                 if parent not in direct:
                     transitive.append(parent)
                     
+    total_affected = len(direct) + len(transitive)
+    
+    # Assess Blast Radius Risk Level
+    if total_affected == 0:
+        risk_badge = "🟢 LOW RISK (Isolated)"
+    elif total_affected <= 3:
+        risk_badge = "🟡 MEDIUM RISK (Manageable)"
+    else:
+        risk_badge = "🔴 HIGH RISK (Critical Surface Area)"
+
+    # Identify affected test files vs source files
+    all_affected = sorted(list(set(direct + transitive)))
+    test_files = [f for f in all_affected if "test" in f.lower() or "spec" in f.lower()]
+    source_files = [f for f in all_affected if f not in test_files]
+
     report = [
         f"# 🚨 Downstream Impact Analysis: `{rel_target}`",
-        f"**Direct Dependents (1st level):** {len(direct)} files",
-        f"**Transitive Dependents (recursive):** {len(transitive)} files",
-        f"**Total Affected Files:** {len(direct) + len(transitive)} files",
+        f"**Blast Radius Assessment:** {risk_badge}",
+        f"- **Direct Dependents (1st level):** {len(direct)} files",
+        f"- **Transitive Dependents (recursive):** {len(transitive)} files",
+        f"- **Total Affected Files:** {total_affected} files",
         ""
     ]
     
     if direct:
-        report.append("### 🔗 Direct Impact (Must review directly)")
+        report.append("### 🔗 Direct Impact (Must update immediately when modifying exports)")
         for d in sorted(direct):
-            report.append(f"- `{d}`")
+            icon = "🧪" if d in test_files else "📄"
+            report.append(f"- {icon} `{d}`")
         report.append("")
         
     if transitive:
-        report.append("### 🌪️ Transitive Impact (Check for regression/refactoring side effects)")
+        report.append("### 🌪️ Transitive Impact (Verify against regressions)")
         for t in sorted(transitive):
-            report.append(f"- `{t}`")
+            icon = "🧪" if t in test_files else "📄"
+            report.append(f"- {icon} `{t}`")
         report.append("")
         
-    if not direct and not transitive:
-        report.append("✅ **Isolation verified:** This file has no downstream dependents. It is safe to refactor without breaking other code.")
+    if test_files:
+        report.append("### 🧪 Affected Test Suites")
+        report.append("Run these test files to verify refactoring integrity:")
+        for tf in sorted(test_files):
+            report.append(f"- `{tf}`")
+        report.append("")
+
+    # Blast-Radius-First Refactoring Playbook
+    if total_affected > 0:
+        report.append("### 📋 Blast-Radius-First Refactoring Playbook")
+        report.append("1. **Contract Lock:** Review existing exports/signatures in `" + rel_target + "`.")
+        report.append("2. **Core Refactor:** Implement changes in `" + rel_target + "`.")
+        report.append(f"3. **Adapt Direct Callers:** Update the {len(direct)} direct dependent files.")
+        if test_files:
+            report.append(f"4. **Regression Run:** Execute tests on: " + ", ".join([f"`{t}`" for t in test_files[:4]]) + ("..." if len(test_files) > 4 else ""))
+        report.append("5. **Verify Transitive:** Validate that no downstream runtime contracts were broken.")
+    else:
+        report.append("✅ **Isolation verified:** This file has no downstream dependents. It is safe to refactor without breaking other project modules.")
         
     return "\n".join(report)

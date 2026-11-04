@@ -30,9 +30,11 @@ Every `dev-mcp` project context (`.project-context.json`) includes a dedicated `
 
 ### Fields:
 - **`design_system`**: The baseline framework used (e.g., `tailwind`, `material_ui`, `shadcn_ui`).
-- **`prototype_source`**: Clickable Figma or Open Design link to the prototype canvas.
-- **`open_design_project`**: The reference ID/name of the design workspace.
-- **`artifact_paths`**: List of files generated or modified to implement this design.
+- **`prototype_source`**: URL to Figma canvas or Open Design prototype source.
+- **`open_design_project`**: Reference name or ID of the associated design project.
+- **`artifact_paths`**: List of workspace files generated or modified to implement this design.
+
+*Note: The `open_design` section is pre-initialized in `DEFAULT_CONTEXT` (`context.py`). When running `export_context_markdown()`, this metadata block is automatically formatted and included in `.project-context.md` for AI assistant ingestion.*
 
 ---
 

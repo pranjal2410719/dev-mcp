@@ -1,0 +1,1410 @@
+[
+  {
+    "name": "add_decision",
+    "module": "tools.context_mgmt",
+    "description": "Log an architecture decision record (ADR) in the project context.",
+    "parameters": [
+      {
+        "name": "decision",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "reason",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "alternatives",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "add_key_file",
+    "module": "tools.context_mgmt",
+    "description": "Register a key file with its purpose in the project context.",
+    "parameters": [
+      {
+        "name": "file_path",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "purpose",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "details",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "root_path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "add_milestone",
+    "module": "brain.phase_manager",
+    "description": "Define a milestone with a target date and associated features.",
+    "parameters": [
+      {
+        "name": "name",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "target_date",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "features",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "add_task",
+    "module": "tools.context_mgmt",
+    "description": "Add an active task to the project context.",
+    "parameters": [
+      {
+        "name": "task_id",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "description",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "status",
+        "type": "str",
+        "default": "pending",
+        "required": false
+      },
+      {
+        "name": "branch",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "notes",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "add_to_context_list",
+    "module": "tools.context_mgmt",
+    "description": "Add an item to a list field in the context (e.g. tech_stack.languages, key_files, active_tasks, goals).",
+    "parameters": [
+      {
+        "name": "dot_path",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "item",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "adopt_existing_project",
+    "module": "brain.project_readiness",
+    "description": "Scan an existing legacy codebase (directories, package lists, readmes) and generate context, PRDs, milestones, and audit tasks.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "archive_project_brain",
+    "module": "brain.project_readiness",
+    "description": "Archive current Project Brain settings and context files to .project_brain_archive/ before a reset or pivot, preserving history.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "assess_project_readiness",
+    "module": "brain.project_readiness",
+    "description": "Scan the workspace and evaluate its onboarding readiness score (0-100%) against required Project Brain documents.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "blocked_tasks",
+    "module": "brain.todo_engine",
+    "description": "List all tasks that are blocked, either by dependencies or explicitly.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "bootstrap_project",
+    "module": "brain.project_readiness",
+    "description": "Auto-generate template files and directories (PRD, milestones, active tasks, config yaml) to instantly onboard an unknown repository.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "build_dependency_graph",
+    "module": "brain.dependency",
+    "description": "Scan files and construct a complete mapping of dependencies and references in the project.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "commit_changes",
+    "module": "brain.orchestrator",
+    "description": "Stage all workspace changes and commit them to Git with the approved commit message.",
+    "parameters": [
+      {
+        "name": "message",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "compare_work_to_prd",
+    "module": "brain.prd_manager",
+    "description": "Compare current project context and tasks against PRD requirements to check alignment.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "complete_phase",
+    "module": "brain.phase_manager",
+    "description": "Mark the current phase as completed and optionally advance to the next phase.",
+    "parameters": [
+      {
+        "name": "notes",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "complete_task",
+    "module": "brain.todo_engine",
+    "description": "Mark a task as completed with optional notes.",
+    "parameters": [
+      {
+        "name": "task_id",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "notes",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "create_directory",
+    "module": "tools.file_ops",
+    "description": "Create one or more directories (like mkdir -p).",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": null,
+        "required": true
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "create_project_workspace",
+    "module": "brain.project_readiness",
+    "description": "Create a new isolated project workspace directory, initialize git, bootstrap the project context/brain, and set up first milestone.",
+    "parameters": [
+      {
+        "name": "name",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "template",
+        "type": "str",
+        "default": "blank",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "create_task",
+    "module": "brain.todo_engine",
+    "description": "Create a new task with phase, priority, dependencies, and description.",
+    "parameters": [
+      {
+        "name": "title",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "phase",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "priority",
+        "type": "str",
+        "default": "medium",
+        "required": false
+      },
+      {
+        "name": "depends_on",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "description",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "delete_path",
+    "module": "tools.file_ops",
+    "description": "Delete a file or an empty directory.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": null,
+        "required": true
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "delete_recursive",
+    "module": "tools.file_ops",
+    "description": "Recursively delete a file or directory tree. Use with caution.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": null,
+        "required": true
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "doctor",
+    "module": "brain.project_readiness",
+    "description": "Check the diagnostic health and configuration integrity of the Project Brain and MCP server.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "edit_file",
+    "module": "tools.file_ops",
+    "description": "Edit a file by replacing an exact string with a new string. Use this for targeted code changes instead of rewriting the whole file.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "old_string",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "new_string",
+        "type": "str",
+        "default": null,
+        "required": true
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "end_session",
+    "module": "brain.orchestrator",
+    "description": "End the current session, update progress, and generate a handoff file (does not auto-commit changes).",
+    "parameters": [
+      {
+        "name": "session_summary",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "known_issues",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "export_context_markdown",
+    "module": "tools.context_mgmt",
+    "description": "Export the project context as a Markdown document for sharing with other LLMs and AI tools.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "extract_requirements",
+    "module": "brain.requirements",
+    "description": "Parse PRD markdown files to extract structured requirements and save them into requirements.json.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "generate_handoff",
+    "module": "brain.handoff_engine",
+    "description": "Generate a session summary capturing what was done, what's next, and current project state for handoff to another AI.",
+    "parameters": [
+      {
+        "name": "session_summary",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "known_issues",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "generate_project_brain",
+    "module": "brain.orchestrator",
+    "description": "Generate a complete aggregated Project Brain dashboard showing current status, phase, active/blocked tasks, recent changes, and recommendations.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "get_context",
+    "module": "tools.context_mgmt",
+    "description": "Get the full project context as formatted text. Optionally filter by dot path (e.g. 'tech_stack.languages').",
+    "parameters": [
+      {
+        "name": "dot_path",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "get_current_phase",
+    "module": "brain.phase_manager",
+    "description": "Get the current active phase and its status.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "get_last_handoff",
+    "module": "brain.handoff_engine",
+    "description": "Retrieve the most recent AI handoff document so a new AI session has full context.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "get_prd",
+    "module": "brain.prd_manager",
+    "description": "Retrieve a PRD document (PRD, VISION, SCOPE, REQUIREMENTS). Returns the content of the specified document.",
+    "parameters": [
+      {
+        "name": "document",
+        "type": "str",
+        "default": "PRD",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "git_add",
+    "module": "tools.git_ops",
+    "description": "Stage file(s) for commit (git add).",
+    "parameters": [
+      {
+        "name": "repo_path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      },
+      {
+        "name": "files",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "git_branch",
+    "module": "tools.git_ops",
+    "description": "List local branches (git branch).",
+    "parameters": [
+      {
+        "name": "repo_path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "git_commit",
+    "module": "tools.git_ops",
+    "description": "Commit staged changes with a message (git commit).",
+    "parameters": [
+      {
+        "name": "repo_path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      },
+      {
+        "name": "message",
+        "type": "str",
+        "default": "update",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "git_create_branch",
+    "module": "tools.git_ops",
+    "description": "Create and switch to a new git branch (git checkout -b).",
+    "parameters": [
+      {
+        "name": "repo_path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      },
+      {
+        "name": "branch_name",
+        "type": "str",
+        "default": "",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "git_diff",
+    "module": "tools.git_ops",
+    "description": "Show staged and unstaged changes (git diff).",
+    "parameters": [
+      {
+        "name": "repo_path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      },
+      {
+        "name": "staged",
+        "type": "bool",
+        "default": "False",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "git_log",
+    "module": "tools.git_ops",
+    "description": "Show recent commit history (git log).",
+    "parameters": [
+      {
+        "name": "repo_path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      },
+      {
+        "name": "max_count",
+        "type": "int",
+        "default": "10",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "git_status",
+    "module": "tools.git_ops",
+    "description": "Show the working tree status (git status).",
+    "parameters": [
+      {
+        "name": "repo_path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "glob_files",
+    "module": "tools.file_ops",
+    "description": "Find files matching a glob pattern (e.g. '**/*.ts', 'src/**/*.py').",
+    "parameters": [
+      {
+        "name": "pattern",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "base_path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "impact_analysis",
+    "module": "brain.dependency",
+    "description": "Calculate direct and transitive downstream files affected if a given file is modified.",
+    "parameters": [
+      {
+        "name": "file_path",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "init_context",
+    "module": "tools.context_mgmt",
+    "description": "Initialize or auto-detect project context. Scans project files to detect tech stack, languages, and frameworks.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "list_directory",
+    "module": "tools.file_ops",
+    "description": "List files and directories inside a given directory.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": null,
+        "required": true
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "list_handoffs",
+    "module": "brain.handoff_engine",
+    "description": "List all AI session handoffs with dates.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "list_milestones",
+    "module": "brain.phase_manager",
+    "description": "Show all milestones and their status.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "list_phases",
+    "module": "brain.phase_manager",
+    "description": "List all phases and their status (completed, active, pending).",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "list_tasks",
+    "module": "brain.todo_engine",
+    "description": "List all active tasks, optionally filtered by phase or status.",
+    "parameters": [
+      {
+        "name": "phase",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "status",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "priority",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "next_best_action",
+    "module": "brain.orchestrator",
+    "description": "Intelligently calculate and recommend the next best task to work on based on phase, priority, dependencies, and file hints.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "next_phase",
+    "module": "brain.phase_manager",
+    "description": "Mark current phase as complete and advance to the next phase in sequence.",
+    "parameters": [
+      {
+        "name": "phase_name",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "description",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "next_task",
+    "module": "brain.todo_engine",
+    "description": "Get the highest-priority task that is ready to work on (dependencies met, current phase).",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "prepare_commit",
+    "module": "brain.orchestrator",
+    "description": "Analyze modified workspace files and generate a suggested conventional git commit message and summary for approval.",
+    "parameters": [
+      {
+        "name": "session_summary",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "project_dashboard",
+    "module": "brain.sync_engine",
+    "description": "Generate a unified Project Manager Dashboard combining phase state, todo progress, git status, architecture violations, and a project health score.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "project_info",
+    "module": "tools.context_mgmt",
+    "description": "Get information about the current project environment.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "project_readiness_report",
+    "module": "brain.project_readiness",
+    "description": "Generate a formatted Markdown project readiness report showing missing files, scoring audit, and recommended actions.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "read_file",
+    "module": "tools.file_ops",
+    "description": "Read the contents of a file at the given path.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": null,
+        "required": true
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "remove_context_item",
+    "module": "tools.context_mgmt",
+    "description": "Remove an item from a list in the project context by index.",
+    "parameters": [
+      {
+        "name": "dot_path",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "index",
+        "type": "int",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "reset_context",
+    "module": "tools.context_mgmt",
+    "description": "Reset the project context to default values (clears all data).",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "reset_project_brain",
+    "module": "brain.project_readiness",
+    "description": "Wipe all Project Brain configuration, tasks, and context metadata inside the selected project. Leaves git and source code untouched.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "run_command",
+    "module": "tools.terminal",
+    "description": "Run a shell command and return its output. Always set a reasonable timeout. Avoid destructive commands (rm -rf, etc.).",
+    "parameters": [
+      {
+        "name": "command",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "timeout_seconds",
+        "type": "int",
+        "default": "60",
+        "required": false
+      },
+      {
+        "name": "workdir",
+        "type": "Optional[str]",
+        "default": "None",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "search_code",
+    "module": "tools.search",
+    "description": "Search for a text pattern across files in the project using ripgrep-like search.",
+    "parameters": [
+      {
+        "name": "pattern",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      },
+      {
+        "name": "glob_filter",
+        "type": "str | None",
+        "default": "None",
+        "required": false
+      },
+      {
+        "name": "max_results",
+        "type": "int",
+        "default": "50",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "set_phase",
+    "module": "brain.phase_manager",
+    "description": "Set the current active development phase. Only tasks in this phase are considered 'in scope'.",
+    "parameters": [
+      {
+        "name": "phase_name",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "description",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "start_session",
+    "module": "brain.orchestrator",
+    "description": "Start a development session. Loads state, PRD, active tasks, and latest handoff to generate a detailed Session Brief for the AI.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "summarize_prd",
+    "module": "brain.prd_manager",
+    "description": "Summarize key requirements from PRD documents into a concise bullet list.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "sync_workspace",
+    "module": "brain.sync_engine",
+    "description": "Scan the physical workspace (Git diff, new files, current branch, commits) and compare to the Todo plan to auto-detect finished work.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "update_context",
+    "module": "tools.context_mgmt",
+    "description": "Update a specific field in the project context using dot notation (e.g. 'project.description', 'conventions.code_style').",
+    "parameters": [
+      {
+        "name": "dot_path",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "value",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "update_prd",
+    "module": "brain.prd_manager",
+    "description": "Create or update a PRD document (PRD, VISION, SCOPE, REQUIREMENTS).",
+    "parameters": [
+      {
+        "name": "document",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "content",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "update_task",
+    "module": "brain.todo_engine",
+    "description": "Update a task's status, priority, or description by ID.",
+    "parameters": [
+      {
+        "name": "task_id",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "status",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "priority",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "title",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "validate_architecture",
+    "module": "brain.guardian",
+    "description": "Scan the codebase and validate imports/technologies against the project's architectural guidelines and forbidden tools.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "verify_outcome",
+    "module": "brain.requirements",
+    "description": "Perform outcome audits verifying user flows, business goals, and objective completion based on target tasks.",
+    "parameters": [
+      {
+        "name": "task_id",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "verify_requirements",
+    "module": "brain.requirements",
+    "description": "Scan codebase to map requirement keywords and verify their implementation status and feature coverage.",
+    "parameters": [
+      {
+        "name": "feature_name",
+        "type": "str",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "verify_work",
+    "module": "brain.sync_engine",
+    "description": "Perform deep sanity, test, git diff, and architecture checks against a task to output a reality verification dossier.",
+    "parameters": [
+      {
+        "name": "task_id",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "path",
+        "type": "str",
+        "default": ".",
+        "required": false
+      }
+    ],
+    "return_type": "str"
+  },
+  {
+    "name": "write_file",
+    "module": "tools.file_ops",
+    "description": "Write content to a file, creating it if it doesn't exist.",
+    "parameters": [
+      {
+        "name": "path",
+        "type": "str",
+        "default": null,
+        "required": true
+      },
+      {
+        "name": "content",
+        "type": "str",
+        "default": null,
+        "required": true
+      }
+    ],
+    "return_type": "str"
+  }
+]

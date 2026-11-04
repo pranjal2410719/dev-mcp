@@ -7,7 +7,7 @@ Run directly:
 
 Displays a rich, tab-navigable interface with:
   • General  — about, quick-start, config snippets
-  • Commands — all 50+ MCP tools with short descriptions
+  • Commands — all 71 MCP tools with short descriptions
   • Shortcuts — key-binding reference (mirrors Antigravity CLI style)
 """
 
@@ -171,6 +171,7 @@ COMMANDS: list[tuple[str, str, str]] = [
     ("Brain/Ready", "project_readiness_report","Generate readiness report"),
     ("Brain/Ready", "bootstrap_project",      "Bootstrap a new project"),
     ("Brain/Ready", "adopt_existing_project", "Adopt / onboard existing project"),
+    ("Brain/Ready", "create_project_workspace", "Create isolated project workspace with git"),
     # ── Commit / Prepare ──────────────────────────
     ("Brain/Commit","prepare_commit",         "Prepare commit message & diff"),
     ("Brain/Commit","commit_changes",         "Commit via brain engine"),

@@ -30,11 +30,11 @@ Welcome to the release notes for **`dev-mcp` v2.0.0**. This release represents a
 
 ## 📝 Documentation & Tutorials
 - Added specialized integration guides inside `docs/`:
-  - **[docs/security.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/security.md)**: Safety modes, jailing paths, and blocked command catalogs.
-  - **[docs/workspaces.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/workspaces.md)**: Sibling workspace directory layout and Project Brain isolation.
-  - **[docs/open-design.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/open-design.md)**: Design-to-code integrations and Open Design metadata tracking.
-  - **[docs/antigravity.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/antigravity.md)**: Connecting the server to the Google DeepMind Antigravity CLI.
-  - **[docs/architecture-v2.md](file:///home/dev/Desktop/projects/mcp/dev-mcp/docs/architecture-v2.md)**: v2.0.0 architectural diagrams and execution topologies.
+  - **[docs/security.md](security.md)**: Safety modes, jailing paths, and blocked command catalogs.
+  - **[docs/workspaces.md](workspaces.md)**: Sibling workspace directory layout and Project Brain isolation.
+  - **[docs/open-design.md](open-design.md)**: Design-to-code integrations and Open Design metadata tracking.
+  - **[docs/antigravity.md](antigravity.md)**: Connecting the server to the Google DeepMind Antigravity CLI.
+  - **[docs/architecture-v2.md](architecture-v2.md)**: v2.0.0 architectural diagrams and execution topologies.
 
 ---
 
