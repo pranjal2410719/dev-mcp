@@ -57,8 +57,8 @@ To optimize LLM prompt token consumption, pass the `DEV_MCP_PROFILE` environment
 - `code`: Loads 10 modules (~4,200 tokens, **66.4% reduction**) — file ops, search, context, git ops, commands.
 - `planning`: Loads PRD, todo engine, phases, context (~3,800 tokens, **69.6% reduction**).
 - `audit`: Loads readiness, guardian, dependency, doctor, outcome (~4,500 tokens, **64.0% reduction**).
-- `desktop`: Loads desktop ops, terminal, file ops (~3,100 tokens, **75.2% reduction**).
-- `all` (default): Loads all 18 modules (84 tools).
+- `desktop`: Loads desktop ops, terminal, file ops (~3,600 tokens, **71.2% reduction**).
+- `all` (default): Loads all 18 modules (91 tools).
 
 ### A. Claude Desktop
 Add the configuration to:
@@ -214,7 +214,7 @@ Configurations inside `.project_brain/config.yaml` define safety bounds:
 
 ---
 
-## 🛠️ 6. Complete MCP Tool Reference (84 Tools)
+## 🛠️ 6. Complete MCP Tool Reference (91 Tools)
 
 ### A. Core Workspace Onboarding & Diagnostics (`brain/project_readiness.py`)
 | Tool Name | Parameters | Description |
@@ -334,18 +334,25 @@ Configurations inside `.project_brain/config.yaml` define safety bounds:
 | `git_create_branch` | `repo_path: str = "."`, `branch_name: str = ""` | Create and switch checkout branches. |
 | `install_git_hooks` | `repo_path: str = "."` | Install Git pre-commit hook to auto-sync `.project_brain` on every native commit. |
 
-### L. Desktop GUI Automation & Inspection (`tools/desktop_ops.py`)
+### L. Desktop GUI Automation & Inspection (`tools/desktop_ops.py` — 16 Tools)
 | Tool Name | Parameters | Description |
 | :--- | :--- | :--- |
 | `desktop_status` | None | Verify `agent-desktop` CLI installation and OS accessibility permissions. |
 | `desktop_list_apps` | None | List running applications with process names and window titles. |
-| `desktop_list_windows` | None | Enumerate active desktop windows and their bounds. |
-| `desktop_snapshot` | `app: str = ""` | Capture hierarchical accessibility tree state (JSON/YAML). |
-| `desktop_find` | `name: str = ""`, `role: str = ""`, `app: str = ""` | Query specific UI nodes (buttons, inputs, menus) in the UI tree. |
-| `desktop_click` | `name: str = ""`, `role: str = ""`, `app: str = ""` | Simulate native mouse click on target desktop element. |
-| `desktop_type` | `text: str`, `app: str = ""` | Send native keyboard keystrokes to active window. |
-| `desktop_verify_element` | `name: str`, `role: str = ""`, `app: str = ""` | Assert that an expected element exists and is visible on desktop. |
-| `desktop_screenshot` | `output_path: str = "screenshot.png"` | Capture high-resolution desktop display screenshot. |
+| `desktop_list_windows` | `app: str = ""` | Enumerate active desktop windows and their bounds. |
+| `desktop_snapshot` | `app: str`, `interactive_only: bool = True`, `compact: bool = True` | Capture hierarchical accessibility tree state with `@ref_id` tags. |
+| `desktop_find` | `app: str`, `role: str = ""`, `name: str = ""` | Query specific UI nodes (buttons, inputs, menus) in the UI tree. |
+| `desktop_click` | `ref_id: str`, `headed: bool = False` | Simulate native mouse click on target element. |
+| `desktop_type` | `ref_id: str`, `text: str`, `headed: bool = False` | Send native keyboard text into active window. |
+| `desktop_press` | `key_combo: str`, `headed: bool = False` | Send keyboard shortcuts or key combinations (e.g. 'ctrl+c', 'return', 'alt+tab'). |
+| `desktop_scroll` | `ref_id: str = ""`, `direction: str = "down"`, `amount: int = 3`, `headed: bool = False` | Scroll element or window viewport in discrete tick amounts. |
+| `desktop_launch` | `app: str`, `activate: bool = True` | Launch desktop application and await window presentation. |
+| `desktop_close_app` | `app: str`, `force: bool = False` | Gracefully quit application or force terminate process. |
+| `desktop_focus_window` | `app: str = ""`, `window_id: str = ""` | Bring target window to foreground and verify OS window focus. |
+| `desktop_clipboard` | `action: str = "get"`, `text: str = ""` | Read, write, or clear system clipboard ('get', 'set', 'clear'). |
+| `desktop_verify_element` | `app: str`, `role: str = ""`, `name: str = ""`, `expected_state: str = ""` | Assert that an expected element exists and assert its state. |
+| `desktop_screenshot` | `app: str`, `output_path: str` | Capture high-resolution desktop display screenshot. |
+| `desktop_action` | `command: str`, `args: list[str] = None`, `timeout: int = 30` | Universal dispatcher executing ANY of the 50+ agent-desktop CLI subcommands. |
 
 ### M. Server Profiling (`server.py`)
 | Tool Name | Parameters | Description |

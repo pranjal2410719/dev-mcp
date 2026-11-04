@@ -2,7 +2,7 @@
 
 **Release Date:** November 2026  
 **Status:** Stable Production Release  
-**Total MCP Tools:** 84 Tools (18 Modules)  
+**Total MCP Tools:** 91 Tools (18 Modules)  
 **Safety Modes:** `safe` (default), `trusted`, `lab`
 
 ---
@@ -16,8 +16,8 @@
    - Reduces initial system prompt LLM token overhead by **up to 75%**.
    - Profile modes: `code`, `planning`, `audit`, `desktop`, and `all` (default).
 2. **agent-desktop GUI Integration (Linux AT-SPI / X11 / Wayland)**:
-   - 9 new desktop automation and inspection tools (`desktop_status`, `desktop_list_apps`, `desktop_list_windows`, `desktop_snapshot`, `desktop_find`, `desktop_click`, `desktop_type`, `desktop_verify_element`, `desktop_screenshot`).
-   - Enables end-to-end multi-modal and GUI accessibility tree verification for native desktop apps, browsers, and terminals.
+   - 16 desktop automation, shortcut, window, and inspection tools plus a universal dispatcher (`desktop_action`).
+   - Enables end-to-end multi-modal, shortcut dispatch, and GUI accessibility tree verification for native desktop apps, browsers, and terminals.
 3. **High-Performance Filesystem & Search Overhaul**:
    - Up to **26.2× faster** path validation in `security.py` by eliminating expensive stack traces on standard operations.
    - Sliced file reads (`start_line`, `end_line`) with line numbering options and large-file truncation protection (>2,500 lines).
@@ -50,6 +50,13 @@
 | `desktop_type` | `text: str`, `app: str = ""` | Send native keyboard input into active element or specified application. |
 | `desktop_verify_element` | `name: str`, `role: str = ""`, `app: str = ""` | Assert that an expected element exists and is visible on desktop. |
 | `desktop_screenshot` | `output_path: str = "screenshot.png"` | Capture high-resolution desktop display screenshot. |
+| `desktop_press` | `key_combo: str`, `headed: bool = False` | Send native keyboard shortcut combo (e.g. 'ctrl+c', 'return', 'alt+tab'). |
+| `desktop_scroll` | `ref_id: str = ""`, `direction: str = "down"`, `amount: int = 3` | Scroll element or window viewport in discrete tick amounts. |
+| `desktop_launch` | `app: str`, `activate: bool = True` | Launch desktop application and await window presentation. |
+| `desktop_close_app` | `app: str`, `force: bool = False` | Gracefully terminate or force-kill application process. |
+| `desktop_focus_window` | `app: str = ""`, `window_id: str = ""` | Bring target window to foreground and verify OS window focus. |
+| `desktop_clipboard` | `action: str = "get"`, `text: str = ""` | Read, write, or clear desktop system clipboard. |
+| `desktop_action` | `command: str`, `args: list[str] = None`, `timeout: int = 30` | Universal dispatcher executing ANY of the 50+ agent-desktop CLI subcommands. |
 
 ### 2. Filesystem & Refactoring (`tools/file_ops.py`)
 | Tool Name | Parameters | Description |
@@ -85,5 +92,5 @@
 
 `dev-mcp` v2.1.0 is **100% backwards-compatible** with v2.0.0 and v1.x configurations.
 - All existing `.project_brain` directories and `.project-context.json` formats remain valid.
-- If `DEV_MCP_PROFILE` is omitted or set to `all`, all 84 tools are registered by default.
+- If `DEV_MCP_PROFILE` is omitted or set to `all`, all 91 tools are registered by default.
 - Safety modes (`safe`, `trusted`, `lab`) continue to protect project boundaries.

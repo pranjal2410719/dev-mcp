@@ -20,9 +20,9 @@ For inquiries, support, or technical contributions, reach out to:
 
 ## ⚡ What's New in v2.1.0?
 
-* **84 Registered MCP Tools across 18 specialized modules.**
+* **91 Registered MCP Tools across 18 specialized modules.**
 * **Dynamic Tool Profiling (`DEV_MCP_PROFILE`)**: Slash LLM prompt token consumption by up to **75%** by loading only the tools relevant to your workflow (`code`, `planning`, `audit`, `desktop`, or `all`).
-* **Desktop GUI Automation & Verification (`tools/desktop_ops.py`)**: Direct integration with `agent-desktop` (Linux AT-SPI / X11 / Wayland, macOS, Windows) for GUI inspection, clicking, typing, and desktop window snapshots.
+* **Desktop GUI Automation & Verification (`tools/desktop_ops.py`)**: 16 dedicated tools plus a universal dispatcher (`desktop_action`) integrating with `agent-desktop` (Linux AT-SPI / X11 / Wayland, macOS, Windows) for 100% full-coverage GUI inspection, clicking, typing, shortcut dispatching, and window automation.
 * **High-Speed Filesystem & Search**:
   - **26.2× faster** path validation in `security.py` (0.087ms vs 2.28ms).
   - Sliced reads (`start_line`, `end_line`), line numbering, and safety truncation (>2,500 lines).
@@ -76,7 +76,7 @@ On server boot, `dev-mcp` renders a rich visual banner with active profile statu
 │                            https://gofastmcp.com                             │
 │                                                                              │
 │                  🖥  Server:      dev-mcp, 3.4.2                              │
-│                  🎯 Profile:     ALL (84 Tools / 18 Modules)                 │
+│                  🎯 Profile:     ALL (91 Tools / 18 Modules)                 │
 │                  🚀 Deploy free: https://horizon.prefect.io                  │
 │                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -86,15 +86,15 @@ On server boot, `dev-mcp` renders a rich visual banner with active profile statu
 
 ## 🎯 Tool Profiles & Token Optimization (`DEV_MCP_PROFILE`)
 
-Loading 84 tools into an LLM context consumes ~12,000 system prompt tokens on every turn. Set the `DEV_MCP_PROFILE` environment variable in your client configuration to load only what you need:
+Loading 91 tools into an LLM context consumes ~12,500 system prompt tokens on every turn. Set the `DEV_MCP_PROFILE` environment variable in your client configuration to load only what you need:
 
 | Profile | Token Overhead | Reduction | Modules Loaded | Primary Use Case |
 | :--- | :--- | :--- | :--- | :--- |
 | `code` | ~4,200 tokens | **66.4%** | File Ops, Search, Context, Git Ops, Terminal | Fast daily coding and refactoring sprints |
 | `planning` | ~3,800 tokens | **69.6%** | PRD Manager, Todo Engine, Phase Manager, Context | Technical project management and roadmaps |
 | `audit` | ~4,500 tokens | **64.0%** | Readiness, Guardian, Dependency, Doctor, Outcome | Architecture review and security audits |
-| `desktop` | ~3,100 tokens | **75.2%** | Desktop Ops, Terminal, File Ops | GUI testing and desktop automation |
-| `all` (default) | ~12,500 tokens | 0% | All 18 modules (84 tools) | Full autonomous development workflows |
+| `desktop` | ~3,600 tokens | **71.2%** | Desktop Ops, Terminal, File Ops | GUI testing and desktop automation |
+| `all` (default) | ~12,500 tokens | 0% | All 18 modules (91 tools) | Full autonomous development workflows |
 
 To check the active profile programmatically, call `get_dev_mcp_profile()`.
 
@@ -240,7 +240,7 @@ Add to `~/.gemini/antigravity-cli/mcp_config.json`:
 
 ---
 
-## 🛠️ Complete MCP Tool Catalog (84 Tools)
+## 🛠️ Complete MCP Tool Catalog (91 Tools)
 
 ### 1. Core Onboarding & Diagnostics (`brain/project_readiness.py`)
 - `assess_project_readiness(path=".")`: Scan directory and calculate readiness score (0-100%).
@@ -340,16 +340,23 @@ Add to `~/.gemini/antigravity-cli/mcp_config.json`:
 - `git_create_branch(repo_path=".", branch_name="")`: Create and checkout branch.
 - `install_git_hooks(repo_path=".")`: Install Git pre-commit hook to automatically sync `.project_brain`.
 
-### 13. Desktop GUI Automation & Verification (`tools/desktop_ops.py`)
+### 13. Desktop GUI Automation & Inspection (`tools/desktop_ops.py` — 16 Tools)
 - `desktop_status()`: Inspect `agent-desktop` CLI installation and AT-SPI accessibility bus.
 - `desktop_list_apps()`: List active desktop processes and window titles.
-- `desktop_list_windows()`: List desktop window IDs and geometry bounds.
-- `desktop_snapshot(app="")`: Capture accessibility tree structure of running applications.
+- `desktop_list_windows(app="")`: List desktop window IDs and geometry bounds.
+- `desktop_snapshot(app="", interactive_only=True, compact=True)`: Capture accessibility tree structure with `@ref_id`s.
 - `desktop_find(name="", role="", app="")`: Locate UI elements (buttons, inputs, menus) by text or role.
-- `desktop_click(name="", role="", app="")`: Trigger native mouse click on target element.
-- `desktop_type(text, app="")`: Send native keyboard keystrokes to active window.
-- `desktop_verify_element(name, role="", app="")`: Verify that expected GUI component exists and is visible.
-- `desktop_screenshot(output_path="screenshot.png")`: Capture full desktop display screenshot.
+- `desktop_click(ref_id, headed=False)`: Trigger semantic or physical mouse click on target element.
+- `desktop_type(ref_id, text, headed=False)`: Send native keyboard text into target field.
+- `desktop_press(key_combo, headed=False)`: Send key shortcut combos (e.g. `ctrl+c`, `return`, `escape`, `alt+tab`).
+- `desktop_scroll(ref_id="", direction="down", amount=3, headed=False)`: Scroll element or window viewport.
+- `desktop_launch(app, activate=True)`: Launch desktop application and await window presentation.
+- `desktop_close_app(app, force=False)`: Gracefully close or force terminate an application.
+- `desktop_focus_window(app="", window_id="")`: Bring target window to foreground and verify OS focus.
+- `desktop_clipboard(action="get|set|clear", text="")`: Read, write, or clear system clipboard.
+- `desktop_verify_element(name, role="", app="", expected_state="")`: Verify that expected GUI component exists and assert state.
+- `desktop_screenshot(app, output_path="screenshot.png")`: Capture PNG screenshot of application window.
+- `desktop_action(command, args=None, timeout=30)`: Universal dispatcher executing ANY of the 50+ `agent-desktop` commands (`is`, `get`, `hover`, `drag`, `wait`, `batch`, `session`, etc.).
 
 ### 14. Server Profiling (`server.py`)
 - `get_dev_mcp_profile()`: Inspect active profile mode, loaded modules, and tool counts.
@@ -369,7 +376,7 @@ For security specifications, see **[docs/security.md](docs/security.md)**.
 
 ## 📚 In-Depth Documentation
 
-- **[User Manual & Developer Guide](docs/user_manual.md)**: Complete guide to all 84 tools with parameter signatures and examples.
+- **[User Manual & Developer Guide](docs/user_manual.md)**: Complete guide to all 91 tools with parameter signatures and examples.
 - **[v2.1.0 Release Notes](docs/release-notes-v2.1.0.md)**: Performance benchmarks and upgrade guides.
 - **[Architecture Specification](docs/architecture-v2.md)**: Architecture, data structures, and multi-agent isolation.
 - **[Security Model](docs/security.md)**: Workspace Lock, safety modes, and command authorization.
