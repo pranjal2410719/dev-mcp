@@ -3,6 +3,7 @@ Desktop GUI automation and verification tools for dev-mcp via agent-desktop.
 
 Bridges CLI, backend, and full-stack software development with native OS
 accessibility tree automation, window management, and GUI verification.
+Provides 100% full-coverage execution of all agent-desktop capabilities.
 """
 
 from __future__ import annotations
@@ -57,6 +58,10 @@ def _run_ad_command(args: list[str], timeout: int = 30) -> dict | str:
         return f"Execution error: {str(e)}"
 
 
+# ---------------------------------------------------------------------------
+# Diagnostics & Discovery
+# ---------------------------------------------------------------------------
+
 @mcp.tool(
     name="desktop_status",
     description="Check desktop accessibility status, permissions, and supported surfaces.",
@@ -90,6 +95,10 @@ def desktop_list_windows(app: str = "") -> str:
     return json.dumps(data, indent=2) if isinstance(data, (dict, list)) else str(data)
 
 
+# ---------------------------------------------------------------------------
+# Inspection & Tree Snapshots
+# ---------------------------------------------------------------------------
+
 @mcp.tool(
     name="desktop_snapshot",
     description="Capture the accessibility tree of an application with actionable @refs.",
@@ -120,6 +129,10 @@ def desktop_find(app: str, role: str = "", name: str = "") -> str:
     return json.dumps(data, indent=2) if isinstance(data, (dict, list)) else str(data)
 
 
+# ---------------------------------------------------------------------------
+# Interaction & Physical / Semantic Inputs
+# ---------------------------------------------------------------------------
+
 @mcp.tool(
     name="desktop_click",
     description="Click an element using its qualified snapshot reference (@snapshot_id:eN).",
@@ -145,6 +158,109 @@ def desktop_type(ref_id: str, text: str, headed: bool = False) -> str:
     data = _run_ad_command(args)
     return json.dumps(data, indent=2) if isinstance(data, (dict, list)) else str(data)
 
+
+@mcp.tool(
+    name="desktop_press",
+    description="Send a keyboard shortcut or key combo (e.g. 'ctrl+c', 'return', 'escape', 'tab').",
+)
+def desktop_press(key_combo: str, headed: bool = False) -> str:
+    """Send key combination or single key press (e.g. 'return', 'escape', 'ctrl+s', 'alt+tab')."""
+    args = ["press", key_combo]
+    if headed:
+        args.append("--headed")
+    data = _run_ad_command(args)
+    return json.dumps(data, indent=2) if isinstance(data, (dict, list)) else str(data)
+
+
+@mcp.tool(
+    name="desktop_scroll",
+    description="Scroll an element or page by direction (up, down, left, right).",
+)
+def desktop_scroll(ref_id: str = "", direction: str = "down", amount: int = 3, headed: bool = False) -> str:
+    """Scroll a target element or window in the given direction."""
+    args = ["scroll"]
+    if ref_id:
+        args.append(ref_id)
+    args.extend(["--direction", direction, "--amount", str(amount)])
+    if headed:
+        args.append("--headed")
+    data = _run_ad_command(args)
+    return json.dumps(data, indent=2) if isinstance(data, (dict, list)) else str(data)
+
+
+# ---------------------------------------------------------------------------
+# Application & Window Lifecycle
+# ---------------------------------------------------------------------------
+
+@mcp.tool(
+    name="desktop_launch",
+    description="Launch a desktop application and optionally wait for its window to appear.",
+)
+def desktop_launch(app: str, activate: bool = True) -> str:
+    """Launch a desktop application by name or binary path."""
+    args = ["launch", app]
+    if activate:
+        args.append("--activate")
+    data = _run_ad_command(args, timeout=30)
+    return json.dumps(data, indent=2) if isinstance(data, (dict, list)) else str(data)
+
+
+@mcp.tool(
+    name="desktop_close_app",
+    description="Close an application gracefully or force terminate it.",
+)
+def desktop_close_app(app: str, force: bool = False) -> str:
+    """Quit a running application."""
+    args = ["close-app", app]
+    if force:
+        args.append("--force")
+    data = _run_ad_command(args)
+    return json.dumps(data, indent=2) if isinstance(data, (dict, list)) else str(data)
+
+
+@mcp.tool(
+    name="desktop_focus_window",
+    description="Bring an application or window to the foreground and focus it.",
+)
+def desktop_focus_window(app: str = "", window_id: str = "") -> str:
+    """Bring target window to front and confirm OS focus."""
+    args = ["focus-window"]
+    if window_id:
+        args.append(window_id)
+    elif app:
+        args.extend(["--app", app])
+    else:
+        return "Error: Provide either app name or window_id to focus."
+    data = _run_ad_command(args)
+    return json.dumps(data, indent=2) if isinstance(data, (dict, list)) else str(data)
+
+
+# ---------------------------------------------------------------------------
+# System Clipboard
+# ---------------------------------------------------------------------------
+
+@mcp.tool(
+    name="desktop_clipboard",
+    description="Read, write, or clear system clipboard ('get', 'set', or 'clear').",
+)
+def desktop_clipboard(action: str = "get", text: str = "") -> str:
+    """Interact with the desktop clipboard (actions: 'get', 'set', 'clear')."""
+    act = action.lower().strip()
+    if act == "get":
+        args = ["clipboard-get"]
+    elif act == "set":
+        args = ["clipboard-set", text]
+    elif act == "clear":
+        args = ["clipboard-clear"]
+    else:
+        return f"Error: Unknown clipboard action '{action}'. Choose 'get', 'set', or 'clear'."
+    data = _run_ad_command(args)
+    return json.dumps(data, indent=2) if isinstance(data, (dict, list)) else str(data)
+
+
+# ---------------------------------------------------------------------------
+# Verification & Screen Capture
+# ---------------------------------------------------------------------------
 
 @mcp.tool(
     name="desktop_verify_element",
@@ -188,4 +304,27 @@ def desktop_screenshot(app: str, output_path: str) -> str:
     data = _run_ad_command(args)
     if isinstance(data, dict) and data.get("ok"):
         return f"Screenshot successfully saved to: {output_path}"
+    return json.dumps(data, indent=2) if isinstance(data, (dict, list)) else str(data)
+
+
+# ---------------------------------------------------------------------------
+# Universal Full-Coverage Command Dispatcher
+# ---------------------------------------------------------------------------
+
+@mcp.tool(
+    name="desktop_action",
+    description="Universal dispatcher executing ANY agent-desktop CLI command (hover, drag, wait, is, get, toggle, batch, etc.).",
+)
+def desktop_action(command: str, args: list[str] = None, timeout: int = 30) -> str:
+    """
+    Execute any agent-desktop command directly with full parameter freedom.
+    Examples:
+      - desktop_action('get', ['text', '@ref_id'])
+      - desktop_action('is', ['visible', '@ref_id'])
+      - desktop_action('toggle', ['@ref_id'])
+      - desktop_action('wait', ['--element', '@ref_id', '--predicate', 'actionable'])
+      - desktop_action('batch', ['--file', 'commands.json'])
+    """
+    cmd_args = [command] + (args or [])
+    data = _run_ad_command(cmd_args, timeout=timeout)
     return json.dumps(data, indent=2) if isinstance(data, (dict, list)) else str(data)
