@@ -12,7 +12,6 @@ For inquiries, support, or technical contributions, reach out to:
 
 * **Name:** Pranjal Yadav
 * **Email:** [2k24.cs1l.2410719@gmail.com](mailto:2k24.cs1l.2410719@gmail.com)
-* **Phone:** +91 9219920362
 * **LinkedIn:** [linkedin.com/in/-pranjal22/](https://www.linkedin.com/in/-pranjal22/)
 * **GitHub:** [github.com/pranjal2410719](https://github.com/pranjal2410719)
 
