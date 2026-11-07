@@ -100,6 +100,14 @@ class TestDevMCPOptimizations(unittest.TestCase):
         env_profile, mods = server._resolve_profile_modules()
         self.assertTrue(len(mods) > 0)
 
+    def test_tool_inventory_count_and_cli_sync(self):
+        """Verify that server registers exactly 91 tools in FastMCP and cli.COMMANDS mirrors all 91 tools."""
+        import asyncio
+        import cli
+        tools = asyncio.run(app.mcp.list_tools())
+        self.assertEqual(len(tools), 91, f"Expected 91 tools registered in FastMCP, found {len(tools)}")
+        self.assertEqual(len(cli.COMMANDS), 91, f"Expected 91 tools in cli.COMMANDS, found {len(cli.COMMANDS)}")
+
 
 if __name__ == "__main__":
     unittest.main()

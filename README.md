@@ -1,4 +1,6 @@
-# 🧠 dev-mcp: AI Engineering Operating System (v2.1.0)
+<!-- mcp-name: io.github.pranjal2410719/dev-mcp -->
+
+# 🧠 dev-mcp: AI Engineering Operating System (v2.2.0)
 
 `dev-mcp` is a production-grade **Model Context Protocol (MCP)** server that turns your AI assistants (Claude, Cursor, Gemini, Cline, Roo Code, Windsurf, Antigravity CLI) into autonomous **Technical Project Managers and Desktop Automation Engineers**. 
 
@@ -121,12 +123,37 @@ Or, while running the `dev-mcp` server interactively in a terminal, press `?`, `
 - *(Optional)* **agent-desktop** (`npm install -g agent-desktop`) for GUI testing on Linux, macOS, or Windows.
 - *(Optional)* **ripgrep** (`sudo apt install ripgrep`) for high-speed file searches.
 
-### 2. Local Installation
-```bash
-# Clone or navigate to the repository
-cd /path/to/dev-mcp
+### 2. Installation Options
 
-# Setup virtual environment with uv (recommended)
+**Package Installation (PyPI: `braynix-dev-mcp`)**
+```bash
+# One-time installation
+uv tool install braynix-dev-mcp
+
+# Run the server
+dev-mcp
+
+# Or run without a permanent installation
+uvx --from braynix-dev-mcp dev-mcp
+
+# Open the interactive guide
+dev-mcp-guide
+```
+
+Alternatively using `pip` or `pipx`:
+```bash
+pipx install braynix-dev-mcp
+# or in a virtualenv:
+pip install braynix-dev-mcp
+```
+
+**Local Development Clone**
+```bash
+# Clone the repository
+git clone https://github.com/pranjal2410719/dev-mcp.git
+cd dev-mcp
+
+# Setup virtual environment with uv
 uv venv
 source .venv/bin/activate
 uv pip install -e .
@@ -141,14 +168,15 @@ pip install -e .
 
 ## ⚙️ Configuring AI Clients
 
+Clients can invoke `dev-mcp` directly (if installed globally or in PATH) or via its virtual environment Python executable.
+
 ### 1. Claude Desktop
 Add to `~/.config/Claude/claude_desktop_config.json` (Linux/macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 ```json
 {
   "mcpServers": {
     "dev-mcp": {
-      "command": "/path/to/dev-mcp/.venv/bin/python",
-      "args": ["/path/to/dev-mcp/server.py"],
+      "command": "dev-mcp",
       "env": {
         "DEV_MCP_PROFILE": "all"
       }
@@ -156,14 +184,16 @@ Add to `~/.config/Claude/claude_desktop_config.json` (Linux/macOS) or `%APPDATA%
   }
 }
 ```
+*(If running from a local source checkout, set `"command": "/path/to/dev-mcp/.venv/bin/python"` and `"args": ["/path/to/dev-mcp/server.py"]`)*
 
 ### 2. Cursor
 1. Go to **Settings** → **Features** → **MCP**.
 2. Click **+ Add New MCP Server**.
 3. Set Name to `dev-mcp`, Type to `command`, and Command to:
    ```bash
-   /path/to/dev-mcp/.venv/bin/python /path/to/dev-mcp/server.py
+   dev-mcp
    ```
+   *(or `/path/to/dev-mcp/.venv/bin/python /path/to/dev-mcp/server.py` for source checkouts)*
 
 ### 3. Windsurf
 Add to your `mcp_config.json`:
@@ -171,8 +201,7 @@ Add to your `mcp_config.json`:
 {
   "mcpServers": {
     "dev-mcp": {
-      "command": "/path/to/dev-mcp/.venv/bin/python",
-      "args": ["/path/to/dev-mcp/server.py"],
+      "command": "dev-mcp",
       "env": {
         "DEV_MCP_PROFILE": "code"
       }
@@ -187,12 +216,13 @@ Add to `~/.gemini/antigravity-cli/mcp_config.json`:
 {
   "mcpServers": {
     "dev-mcp": {
-      "command": "/path/to/dev-mcp/.venv/bin/python",
-      "args": ["/path/to/dev-mcp/server.py"]
+      "command": "dev-mcp"
     }
   }
 }
 ```
+
+> **Host Client vs MCP Server Boundary:** Slash commands (`/goal`, `/schedule`, `/grill-me`, `/teamwork`, `/learn`) are specialized execution loops of host clients like Antigravity CLI. Dev MCP provides the 91 deterministic MCP tools, state persistence (`.project_brain/`), and safety guardrails that host agents invoke during those workflows.
 
 ---
 
@@ -242,7 +272,7 @@ Add to `~/.gemini/antigravity-cli/mcp_config.json`:
 ## 🛠️ Complete MCP Tool Catalog (91 Tools)
 
 ### 1. Core Onboarding & Diagnostics (`brain/project_readiness.py`)
-- `assess_project_readiness(path=".")`: Scan directory and calculate readiness score (0-100%).
+- `assess_project_readiness(path=".")`: Scan directory and calculate structural onboarding readiness score (0-100%) across PRD, tasks, git, and tests.
 - `project_readiness_report(path=".")`: Generate formatted Markdown readiness report.
 - `bootstrap_project(path=".")`: Initialize PRD templates, milestones, and brain structure.
 - `adopt_existing_project(path=".")`: Scan existing legacy repository and draft PRD, context, and backlog.
@@ -282,11 +312,11 @@ Add to `~/.gemini/antigravity-cli/mcp_config.json`:
 - `summarize_prd(path=".")`: Generate bullet-point requirements summary.
 - `compare_work_to_prd(path=".")`: Audit backlog against PRD specifications.
 - `extract_requirements(path=".")`: Extract structured requirements into `requirements.json`.
-- `verify_requirements(feature_name="", path=".")`: Verify code implementation coverage against PRD.
+- `verify_requirements(feature_name="", path=".")`: Verify code implementation coverage against PRD section keywords (pair with `verify_work` for unit test coverage).
 - `verify_outcome(task_id, path=".")`: Deep outcome audit verifying end-to-end user journeys.
 
 ### 6. Workspace Sync & Verification (`brain/sync_engine.py`)
-- `sync_workspace(path=".")`: Match Git commits and physical changes to tasks to auto-close work.
+- `sync_workspace(path=".")`: Match Git branch names, commit logs, and modified files to tasks to compute heuristic completion confidence scores.
 - `verify_work(task_id, path=".")`: Gather git diff, tests, and architecture rules to compile verification dossier.
 - `project_dashboard(path=".")`: Unified manager dashboard combining Git, tasks, and code health.
 
@@ -376,6 +406,7 @@ For security specifications, see **[docs/security.md](docs/security.md)**.
 ## 📚 In-Depth Documentation
 
 - **[User Manual & Developer Guide](docs/user_manual.md)**: Complete guide to all 91 tools with parameter signatures and examples.
+- **[v2.2.0 Release Notes](docs/release-notes-v2.2.0.md)**: Local distribution, PyPI packaging, and MCP Registry metadata.
 - **[v2.1.0 Release Notes](docs/release-notes-v2.1.0.md)**: Performance benchmarks and upgrade guides.
 - **[Architecture Specification](docs/architecture-v2.md)**: Architecture, data structures, and multi-agent isolation.
 - **[Security Model](docs/security.md)**: Workspace Lock, safety modes, and command authorization.

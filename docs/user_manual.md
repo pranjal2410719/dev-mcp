@@ -10,7 +10,6 @@ For issues, questions, or collaboration requests, contact:
 
 * **Name:** Pranjal Yadav
 * **Email:** [2k24.cs1l.2410719@gmail.com](mailto:2k24.cs1l.2410719@gmail.com)
-* **Phone:** +91 9219920362
 * **LinkedIn:** [linkedin.com/in/-pranjal22/](https://www.linkedin.com/in/-pranjal22/)
 * **GitHub:** [github.com/pranjal2410719](https://github.com/pranjal2410719)
 
@@ -49,8 +48,8 @@ pip install -e .
 
 Configure the server in your editor or assistant of choice. 
 
-* **Absolute Command Path:** `/path/to/dev-mcp/.venv/bin/python`
-* **Absolute Argument Path:** `/path/to/dev-mcp/server.py`
+* **Installed CLI Command:** `dev-mcp` (or via `uvx dev-mcp` / `pip install -e .`)
+* **Source Invocation (venv):** `/path/to/dev-mcp/.venv/bin/python /path/to/dev-mcp/server.py`
 
 ### Dynamic Tool Profiling (`DEV_MCP_PROFILE`)
 To optimize LLM prompt token consumption, pass the `DEV_MCP_PROFILE` environment variable in your client configuration:
@@ -133,6 +132,8 @@ When executing inside `antigravity-cli`, developers have access to direct slash 
 * **`/grill-me`** — Starts an interactive interview between the agent and developer to clarify goals and draft technical specifications.
 * **`/teamwork`** — Coordinates a swarm of autonomous subagents.
 * **`/learn`** — Directs the agent to persist corrections or custom setup workflows across subsequent workspace sessions.
+
+> **Important Host vs. Server Distinction:** These slash commands are specialized features of the **host client** (e.g., Antigravity CLI), **not** native MCP tools provided by `dev-mcp`. The `dev-mcp` server exposes 91 deterministic MCP tools that host agents invoke autonomously to inspect, modify, and verify the workspace during these sessions.
 
 ---
 
@@ -219,7 +220,7 @@ Configurations inside `.project_brain/config.yaml` define safety bounds:
 ### A. Core Workspace Onboarding & Diagnostics (`brain/project_readiness.py`)
 | Tool Name | Parameters | Description |
 | :--- | :--- | :--- |
-| `assess_project_readiness` | `path: str = "."` | Scan directory files and compute readiness score (0-100%) and maturity level (Levels 0-5). |
+| `assess_project_readiness` | `path: str = "."` | Scan directory files and compute structural onboarding readiness score (0-100%) and maturity level (Levels 0-5) based on documentation, PRD, backlog, git, and test scaffolding. |
 | `project_readiness_report` | `path: str = "."` | Generate a detailed Markdown checklist report of missing files, scoring audits, and recommendations. |
 | `bootstrap_project` | `path: str = "."` | Generate empty template folders, configuration YAML, and context JSONs to onboard a fresh directory. |
 | `adopt_existing_project` | `path: str = "."` | Scan an existing legacy repository (README, dependencies, structure) and draft initial context, PRD, and audit tasks. |
@@ -267,13 +268,13 @@ Configurations inside `.project_brain/config.yaml` define safety bounds:
 | `summarize_prd` | `path: str = "."` | Extract concise bulleted requirement summaries from all specifications. |
 | `compare_work_to_prd` | `path: str = "."` | Audit task backlogs and contexts against the PRD to detect alignment gaps. |
 | `extract_requirements` | `path: str = "."` | Extract structured requirement tags and keywords from the PRD markdown into `requirements.json`. |
-| `verify_requirements` | `feature_name: str = ""`, `path: str = "."` | Scan codebase files to map requirement status based on keyword density. |
+| `verify_requirements` | `feature_name: str = ""`, `path: str = "."` | Scan codebase files to map requirement status based on lexical PRD section keywords (pair with `verify_work` for unit test validation). |
 | `verify_outcome` | `task_id: str`, `path: str = "."` | Verify user entrypoints, validations, persistence schemas, and error pathways for a target task. |
 
 ### F. Workspace Sync & Reality Checks (`brain/sync_engine.py`)
 | Tool Name | Parameters | Description |
 | :--- | :--- | :--- |
-| `sync_workspace` | `path: str = "."` | Match Git branches, commits, and diff structures to the backlog to auto-detect finished work. |
+| `sync_workspace` | `path: str = "."` | Match Git branches, commit messages, and touched file paths to the backlog to calculate heuristic task completion confidence scores. |
 | `verify_work` | `task_id: str`, `path: str = "."` | Compile verification confidence reports using tests, Git status, and guardian audits. |
 | `project_dashboard` | `path: str = "."` | Generate a unified dashboard displaying workspace git states, tasks, phases, and overall health scores. |
 
