@@ -34,7 +34,10 @@ def _git_cmd(repo_path: str | None, *args: str) -> str:
         if result.stderr:
             output_parts.append(f"--- stderr ---\n{result.stderr.strip()}")
         status = f"[Exit code: {result.returncode}]"
-        return f"{status}\n{"\n".join(output_parts)}" if output_parts else status
+        if output_parts:
+            joined = "\n".join(output_parts)
+            return f"{status}\n{joined}"
+        return status
     except FileNotFoundError:
         return "Git is not installed or not found in PATH."
     except subprocess.TimeoutExpired:
