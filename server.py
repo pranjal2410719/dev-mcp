@@ -180,6 +180,8 @@ from rich.table import Table
 def _print_banner() -> None:
     """Render the attractive startup banner with server info to stderr."""
     console = Console(stderr=True)
+    if sys.stderr.isatty():
+        console.clear()
     grid = Table.grid(padding=(0, 2))
     grid.add_column(style="bold cyan", justify="right")
     grid.add_column(style="white")
@@ -192,7 +194,7 @@ def _print_banner() -> None:
 
     panel = Panel(
         grid,
-        title="[bold white]🧠 dev-mcp [cyan]v2.2.1[/cyan][/bold white] [dim]— AI Engineering Operating System[/dim]",
+        title="[bold white]🧠 dev-mcp [cyan]v2.2.2[/cyan][/bold white] [dim]— AI Engineering Operating System[/dim]",
         title_align="left",
         subtitle="[dim]Press [bold cyan]?[/bold cyan] for Interactive Guide · [bold red]q[/bold red] to stop[/dim]",
         subtitle_align="right",

@@ -30,3 +30,6 @@ share/python-wheels/
 .project-context.json
 .project-context.md
 .project_brain/
+
+# uv lock
+uv.lock

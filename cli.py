@@ -5,30 +5,26 @@ Run directly:
     python cli.py
     dev-mcp-guide          (if registered in pyproject.toml scripts)
 
-Displays a rich, tab-navigable interface with:
-  • General  — about, quick-start, config snippets
-  • Commands — all 91 MCP tools with short descriptions
-  • Shortcuts — key-binding reference (mirrors Antigravity CLI style)
+Displays a rich, tab-navigable, top-pinned TUI interface with:
+  • General   — about, quick-start, config snippets (paginated sections)
+  • Commands  — all 91 MCP tools with manual scrolling (↑/↓, PgUp/PgDn, Home/End)
+  • Shortcuts — key-binding reference with manual scrolling
 """
 
 from __future__ import annotations
 
 import sys
 import os
+import shutil
 import textwrap
-from typing import NamedTuple
 
 # ── rich imports ──────────────────────────────────────────────────────────────
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from rich.columns import Columns
 from rich.text import Text
 from rich.rule import Rule
-from rich.align import Align
 from rich import box
-from rich.live import Live
-from rich.layout import Layout
 
 # ── optional: readchar for key detection ─────────────────────────────────────
 try:
@@ -45,54 +41,36 @@ console = Console()
 
 TABS = ["general", "commands", "shortcuts"]
 
-SHORTCUTS = [
-    ("ctrl+c, q",         "Quit / exit the guide"),
-    ("←  /  →  or tab",  "Cycle between tabs"),
-    ("↑  /  ↓",           "Scroll within a tab"),
-    ("pgup / pgdown",     "Page up / page down"),
-    ("home / end",        "Go to top / bottom"),
-    ("enter",             "Confirm / select"),
-    ("?",                 "Toggle this shortcuts view"),
-]
-
-ALL_SHORTCUTS = [
-    # ── Navigation ────────────────────────────────
-    ("←  /  →",                        "Switch tab (prev / next)"),
-    ("tab",                             "Next tab"),
-    ("shift+tab",                       "Previous tab"),
-    ("↑  /  ↓",                        "Move up / down"),
-    ("pgup, shift+↑",                  "Page up"),
-    ("pgdown, shift+↓",                "Page down"),
-    ("home",                            "Go to top"),
-    ("end",                             "Go to bottom"),
-    # ── Actions ───────────────────────────────────
-    ("enter",                           "Select / confirm"),
-    ("q, ctrl+c, esc",                 "Quit / go back"),
-    ("?",                               "Toggle shortcuts overlay"),
-    # ── Display ───────────────────────────────────
-    ("ctrl+l",                          "Clear / refresh screen"),
-    ("ctrl+r",                          "Reload / refresh content"),
-    # ── Clipboard ─────────────────────────────────
-    ("ctrl+v",                          "Paste into prompt"),
-    ("ctrl+y",                          "Yank (copy selection)"),
-    # ── Text editing (if interactive prompt) ──────
-    ("alt+enter, shift+enter",         "Insert newline in prompt"),
-    ("ctrl+_, ctrl+shift+-",           "Undo last edit"),
-    ("ctrl+shift+z",                    "Redo last edit"),
-    # ── Dev-MCP specific ──────────────────────────
-    ("ctrl+p",                          "Project dashboard overview"),
-    ("ctrl+t",                          "List active tasks"),
-    ("ctrl+b",                          "Build dependency graph"),
-    ("ctrl+h",                          "Generate handoff document"),
-    ("ctrl+g",                          "Open PRD / goal in $EDITOR"),
-    ("ctrl+d",                          "Exit dev-mcp CLI"),
-    ("ctrl+o",                          "Toggle tool output view"),
-    ("ctrl+k",                          "Skip / approve fast"),
-    ("ctrl+z",                          "Suspend CLI to shell"),
+FLAT_SHORTCUTS: list[tuple[str, str, str]] = [
+    # Category, Key combo, Action
+    ("Nav",       "←  /  →",                 "Switch tab (prev / next)"),
+    ("Nav",       "tab / shift+tab",          "Cycle tabs forward / backward"),
+    ("Nav",       "↑  /  ↓  or  j / k",       "Scroll up / down"),
+    ("Nav",       "pgup / pgdown  (b / space)","Page up / page down"),
+    ("Nav",       "home / end  (g / G)",      "Jump to top / bottom"),
+    ("Actions",   "enter",                    "Select / confirm"),
+    ("Actions",   "q, ctrl+c, esc",          "Quit guide / return to server"),
+    ("Actions",   "?",                        "Jump to shortcuts tab"),
+    ("Display",   "ctrl+l",                   "Clear & refresh screen"),
+    ("Display",   "ctrl+r",                   "Reload content"),
+    ("Clipboard", "ctrl+v",                   "Paste into prompt"),
+    ("Clipboard", "ctrl+y",                   "Yank (copy selection)"),
+    ("Editing",   "alt+enter, shift+enter",  "Insert newline in prompt"),
+    ("Editing",   "ctrl+_, ctrl+shift+-",    "Undo last edit"),
+    ("Editing",   "ctrl+shift+z",             "Redo last edit"),
+    ("Brain",     "ctrl+p",                   "Project dashboard overview"),
+    ("Brain",     "ctrl+t",                   "List active tasks"),
+    ("Brain",     "ctrl+b",                   "Build dependency graph"),
+    ("Brain",     "ctrl+h",                   "Generate handoff document"),
+    ("Brain",     "ctrl+g",                   "Open PRD in editor"),
+    ("Brain",     "ctrl+d",                   "Exit dev-mcp CLI"),
+    ("Brain",     "ctrl+o",                   "Toggle tool output view"),
+    ("Brain",     "ctrl+k",                   "Skip / approve fast"),
+    ("Brain",     "ctrl+z",                   "Suspend CLI to shell"),
 ]
 
 COMMANDS: list[tuple[str, str, str]] = [
-    # category, tool name, description
+    # Category, Tool Name, Description
     # ── File Operations ───────────────────────────
     ("File Ops",    "read_file",              "Read a file's contents"),
     ("File Ops",    "write_file",             "Write / overwrite a file"),
@@ -275,8 +253,18 @@ TAB_IDLE = "dim on #1a1a2e"
 BORDER   = "#2e4a6a"
 
 
+def _get_visible_limit() -> int:
+    """Calculate visible table rows based on current terminal height."""
+    try:
+        lines = shutil.get_terminal_size((80, 24)).lines
+    except Exception:
+        lines = 24
+    # Chrome: 1 header line, 1 spacing, panel borders (2 lines), table header & divider (2 lines), 1 rule, 1 footer line
+    return max(5, lines - 9)
+
+
 def _header(active_tab: int) -> Text:
-    """Render the top bar with tab indicators."""
+    """Render the top bar with active tab indicator."""
     line = Text()
     line.append("  dev-mcp  ", style="bold white on #0d3b5e")
     for i, name in enumerate(TABS):
@@ -284,44 +272,101 @@ def _header(active_tab: int) -> Text:
             line.append(f"  {name}  ", style=TAB_ACT)
         else:
             line.append(f"  {name}  ", style=TAB_IDLE)
-    line.append("  (←/→ or tab to cycle)", style=DIM)
+    line.append("  │  ←/→ Tab  ·  ↑/↓ Scroll  ·  esc/q Exit", style=DIM)
     return line
 
 
-def _footer() -> Text:
+def _footer(tab_idx: int) -> Text:
+    """Render keyboard shortcuts footer based on active tab."""
     line = Text()
     line.append("  Keyboard: ", style=DIM)
-    line.append("↑/↓", style=ACCENT)
-    line.append(" Navigate  ", style=DIM)
+    if tab_idx == 0:
+        line.append("↑/k", style=ACCENT)
+        line.append(" Prev Section  ", style=DIM)
+        line.append("↓/j", style=ACCENT)
+        line.append(" Next Section  ", style=DIM)
+    else:
+        line.append("↑/k", style=ACCENT)
+        line.append(" Up  ", style=DIM)
+        line.append("↓/j", style=ACCENT)
+        line.append(" Down  ", style=DIM)
+        line.append("PgUp/PgDn", style=ACCENT)
+        line.append(" Page  ", style=DIM)
+    line.append("Home/End", style=ACCENT)
+    line.append(" Top/End  ", style=DIM)
     line.append("←/→", style=ACCENT)
     line.append(" Switch Tab  ", style=DIM)
-    line.append("esc", style=ACCENT)
-    line.append(" Back to server  ", style=DIM)
-    line.append("q", style=ACCENT)
-    line.append(" Quit  ", style=DIM)
-    line.append("?", style=ACCENT)
-    line.append(" Shortcuts", style=DIM)
+    line.append("esc/q", style="bold red")
+    line.append(" Exit", style=DIM)
     return line
 
 
-def _render_general() -> Panel:
+def _render_general(section_idx: int | None = 0) -> Panel:
+    """Render General quickstart. If section_idx is None, render all (static)."""
+    if section_idx is None:
+        body = Text()
+        for i, (title, content) in enumerate(GENERAL_SECTIONS):
+            if i > 0:
+                body.append("\n\n")
+            body.append(f"  {title}\n", style=HEADING)
+            body.append("  " + "─" * 60 + "\n", style=DIM)
+            body.append_text(Text.from_markup("  " + content.replace("\n", "\n  ")))
+        return Panel(
+            body,
+            title="[bold cyan]General[/bold cyan]",
+            border_style=BORDER,
+            padding=(1, 2),
+        )
+
+    total = len(GENERAL_SECTIONS)
+    section_idx = max(0, min(section_idx, total - 1))
+    title, content = GENERAL_SECTIONS[section_idx]
+
+    dots = []
+    for i in range(total):
+        if i == section_idx:
+            dots.append(f"[bold cyan]● {i + 1}[/bold cyan]")
+        else:
+            dots.append(f"[dim]○ {i + 1}[/dim]")
+    dots_str = " ".join(dots)
+
     body = Text()
-    for i, (title, content) in enumerate(GENERAL_SECTIONS):
-        if i > 0:
-            body.append("\n\n")
-        body.append(f"  {title}\n", style=HEADING)
-        body.append("  " + "─" * 60 + "\n", style=DIM)
-        # render rich markup via console.render_text trick
-        body.append_text(Text.from_markup("  " + content.replace("\n", "\n  ")))
+    body.append(f"\n  {title}\n", style=HEADING)
+    body.append("  " + "─" * 68 + "\n\n", style=DIM)
+    body.append_text(Text.from_markup("  " + content.replace("\n", "\n  ")))
+
+    subtitle = (
+        f"Section [bold white]{section_idx + 1}[/bold white] of [bold cyan]{total}[/bold cyan] ({dots_str})  │  "
+        "[dim]↑/k Prev Section · ↓/j Next Section · Home/End Top/Bottom[/dim]"
+    )
+
     return Panel(
         body,
-        title="[bold cyan]General[/bold cyan]",
+        title="[bold cyan]General — dev-mcp Quickstart[/bold cyan]",
+        subtitle=subtitle,
         border_style=BORDER,
-        padding=(1, 2),
+        padding=(0, 1),
     )
 
 
-def _render_commands() -> Panel:
+def _render_commands(offset: int = 0, limit: int | None = None) -> Panel:
+    """Render MCP commands list with windowed pagination."""
+    total = len(COMMANDS)
+    if limit is None:
+        slice_end = total
+        items = COMMANDS
+        subtitle = f"[bold cyan]{total}[/bold cyan] tools registered"
+    else:
+        max_offset = max(0, total - limit)
+        offset = max(0, min(offset, max_offset))
+        slice_end = min(total, offset + limit)
+        items = COMMANDS[offset:slice_end]
+        pct = int((slice_end / total) * 100) if total else 100
+        subtitle = (
+            f"Showing tools [bold white]{offset + 1}–{slice_end}[/bold white] of [bold cyan]{total}[/bold cyan] ({pct}%)  │  "
+            "[dim]↑/k Up · ↓/j Down · PgUp/PgDn · Home/End[/dim]"
+        )
+
     table = Table(
         box=box.SIMPLE,
         show_header=True,
@@ -330,109 +375,119 @@ def _render_commands() -> Panel:
         expand=True,
         padding=(0, 1),
     )
-    table.add_column("Category",   style="bold #5fa8d3", no_wrap=True, width=14)
-    table.add_column("Tool",       style="bold green",   no_wrap=True, width=26)
-    table.add_column("Description",style="white")
+    table.add_column("#",          style="dim",          no_wrap=True, width=4, justify="right")
+    table.add_column("Category",   style="bold #5fa8d3", no_wrap=True, width=13)
+    table.add_column("Tool",       style="bold green",   no_wrap=True, width=24)
+    table.add_column("Description",style="white",        no_wrap=True, overflow="ellipsis")
 
     prev_cat = None
-    for cat, name, desc in COMMANDS:
+    start_idx = offset + 1 if limit is not None else 1
+    for idx, (cat, name, desc) in enumerate(items, start=start_idx):
         cat_cell = cat if cat != prev_cat else ""
-        table.add_row(cat_cell, name, desc)
+        table.add_row(str(idx), cat_cell, name, desc)
         prev_cat = cat
 
     return Panel(
         table,
         title="[bold cyan]MCP Tools[/bold cyan]",
-        subtitle=f"[dim]{len(COMMANDS)} tools registered[/dim]",
+        subtitle=subtitle,
         border_style=BORDER,
-        padding=(0, 1),
+        padding=(0, 0),
     )
 
 
-def _render_shortcuts() -> Panel:
+def _render_shortcuts(offset: int = 0, limit: int | None = None) -> Panel:
+    """Render shortcuts reference with windowed pagination."""
+    total = len(FLAT_SHORTCUTS)
+    if limit is None:
+        slice_end = total
+        items = FLAT_SHORTCUTS
+        subtitle = f"[bold cyan]{total}[/bold cyan] shortcuts configured"
+    else:
+        max_offset = max(0, total - limit)
+        offset = max(0, min(offset, max_offset))
+        slice_end = min(total, offset + limit)
+        items = FLAT_SHORTCUTS[offset:slice_end]
+        pct = int((slice_end / total) * 100) if total else 100
+        subtitle = (
+            f"Showing shortcuts [bold white]{offset + 1}–{slice_end}[/bold white] of [bold cyan]{total}[/bold cyan] ({pct}%)  │  "
+            "[dim]↑/k Up · ↓/j Down · PgUp/PgDn · Home/End[/dim]"
+        )
+
     table = Table(
         box=box.SIMPLE,
-        show_header=False,
+        show_header=True,
+        header_style="bold cyan",
+        row_styles=["", "dim"],
         expand=True,
-        padding=(0, 2),
+        padding=(0, 1),
     )
-    table.add_column("Shortcut", style="bold cyan",  no_wrap=True, width=36)
-    table.add_column("Action",   style="white")
+    table.add_column("#",        style="dim",          no_wrap=True, width=4, justify="right")
+    table.add_column("Category", style="bold #5fa8d3", no_wrap=True, width=12)
+    table.add_column("Shortcut", style="bold cyan",    no_wrap=True, width=26)
+    table.add_column("Action",   style="white",        no_wrap=True, overflow="ellipsis")
 
-    # Group by section markers
-    sections = [
-        ("Navigation",        slice(0, 8)),
-        ("Actions",           slice(8, 11)),
-        ("Display",           slice(11, 13)),
-        ("Clipboard",         slice(13, 15)),
-        ("Text Editing",      slice(15, 18)),
-        ("dev-mcp Specific",  slice(18, None)),
-    ]
-
-    for section_name, sl in sections:
-        table.add_row(
-            Text(f"  {section_name}", style="bold yellow"),
-            Text(""),
-        )
-        for key, action in ALL_SHORTCUTS[sl]:
-            table.add_row(f"  {key}", action)
-        table.add_row("", "")  # spacer
-
-    note = Text("\n  /keybindings  to customize your shortcuts", style="dim italic")
-    from rich.console import Group
-    content = Group(table, note)
+    prev_cat = None
+    start_idx = offset + 1 if limit is not None else 1
+    for idx, (cat, key, action) in enumerate(items, start=start_idx):
+        cat_cell = cat if cat != prev_cat else ""
+        table.add_row(str(idx), cat_cell, key, action)
+        prev_cat = cat
 
     return Panel(
-        content,
+        table,
         title="[bold cyan]Keyboard Shortcuts[/bold cyan]",
+        subtitle=subtitle,
         border_style=BORDER,
-        padding=(0, 1),
+        padding=(0, 0),
     )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Static (non-interactive) renderer  — used when no terminal / readchar
+# Static (non-interactive) renderer — used when no terminal / piped
 # ─────────────────────────────────────────────────────────────────────────────
 
 def render_static(tab: int = 0) -> None:
-    """Print all three tabs sequentially (non-interactive fallback)."""
+    """Print tab content sequentially (non-interactive fallback)."""
     console.print()
     console.print(_header(tab))
     console.print()
 
     if tab == 0:
-        console.print(_render_general())
+        console.print(_render_general(None))
     elif tab == 1:
-        console.print(_render_commands())
+        console.print(_render_commands(limit=None))
     else:
-        console.print(_render_shortcuts())
+        console.print(_render_shortcuts(limit=None))
 
     console.print(Rule(style=BORDER))
-    console.print(_footer())
+    console.print(_footer(tab))
     console.print()
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Interactive (readchar) renderer
+# Interactive TUI renderer — starts pinned at the top, scrollable by user
 # ─────────────────────────────────────────────────────────────────────────────
 
-def render_interactive() -> None:
-    """Full interactive mode with tab switching via arrow keys."""
-    import shutil
+def render_interactive(start_tab: int = 0) -> None:
+    """Interactive TUI mode pinned to top of terminal with manual scrolling."""
+    tab = start_tab
+    offsets: dict[int, int] = {0: 0, 1: 0, 2: 0}
 
-    tab = 0
-    _renders = [_render_general, _render_commands, _render_shortcuts]
-
-    def _refresh():
-        # Move cursor to top and redraw
-        os.system("clear" if os.name != "nt" else "cls")
-        console.print()
+    def _refresh() -> None:
+        console.clear()
+        limit = _get_visible_limit()
         console.print(_header(tab))
-        console.print()
-        console.print(_renders[tab]())
+
+        if tab == 0:
+            console.print(_render_general(offsets[0]))
+        elif tab == 1:
+            console.print(_render_commands(offsets[1], limit=limit))
+        else:
+            console.print(_render_shortcuts(offsets[2], limit=limit))
+
         console.print(Rule(style=BORDER))
-        console.print(_footer())
-        console.print()
+        console.print(_footer(tab))
 
     _refresh()
 
@@ -442,21 +497,84 @@ def render_interactive() -> None:
         except (KeyboardInterrupt, EOFError):
             break
 
-        if key in (readchar.key.LEFT,  "h"):
-            tab = (tab - 1) % len(TABS)
-            _refresh()
-        elif key in (readchar.key.RIGHT, "l", "\t"):
-            tab = (tab + 1) % len(TABS)
-            _refresh()
-        elif key in ("q", readchar.key.CTRL_C, readchar.key.ESC, readchar.key.CTRL_D):
+        limit = _get_visible_limit()
+
+        # ── Exit ──────────────────────────────────────────────
+        if key in ("q", "Q", readchar.key.ESC, readchar.key.CTRL_C, readchar.key.CTRL_D):
             break
-        elif key in ("?",):
-            tab = 2  # jump to shortcuts tab
-            _refresh()
-        elif key in (readchar.key.CTRL_L,):
+
+        # ── Up / Previous ─────────────────────────────────────
+        elif key in (readchar.key.UP, "k", "\x1b[A", "\x1bOA"):
+            offsets[tab] = max(0, offsets[tab] - 1)
             _refresh()
 
-    console.print("\n[dim]← Returning to server.  Press [bold cyan]?[/bold cyan] again to reopen this guide.[/dim]\n")
+        # ── Down / Next ───────────────────────────────────────
+        elif key in (readchar.key.DOWN, "j", "\x1b[B", "\x1bOB"):
+            if tab == 0:
+                offsets[0] = min(len(GENERAL_SECTIONS) - 1, offsets[0] + 1)
+            elif tab == 1:
+                max_off = max(0, len(COMMANDS) - limit)
+                offsets[1] = min(max_off, offsets[1] + 1)
+            elif tab == 2:
+                max_off = max(0, len(FLAT_SHORTCUTS) - limit)
+                offsets[2] = min(max_off, offsets[2] + 1)
+            _refresh()
+
+        # ── Page Down ─────────────────────────────────────────
+        elif key in (readchar.key.PAGE_DOWN, readchar.key.SPACE, " ", "f", "\x1b[6~"):
+            if tab == 0:
+                offsets[0] = min(len(GENERAL_SECTIONS) - 1, offsets[0] + 1)
+            elif tab == 1:
+                max_off = max(0, len(COMMANDS) - limit)
+                offsets[1] = min(max_off, offsets[1] + limit)
+            elif tab == 2:
+                max_off = max(0, len(FLAT_SHORTCUTS) - limit)
+                offsets[2] = min(max_off, offsets[2] + limit)
+            _refresh()
+
+        # ── Page Up ───────────────────────────────────────────
+        elif key in (readchar.key.PAGE_UP, "b", "\x1b[5~"):
+            if tab == 0:
+                offsets[0] = max(0, offsets[0] - 1)
+            else:
+                offsets[tab] = max(0, offsets[tab] - limit)
+            _refresh()
+
+        # ── Jump to Top (Home / g) ────────────────────────────
+        elif key in (readchar.key.HOME, "g", "\x1b[H", "\x1b[1~", "\x1b[7~", "\x1bOH"):
+            offsets[tab] = 0
+            _refresh()
+
+        # ── Jump to Bottom (End / G) ──────────────────────────
+        elif key in (readchar.key.END, "G", "\x1b[F", "\x1b[4~", "\x1b[8~", "\x1bOF"):
+            if tab == 0:
+                offsets[0] = len(GENERAL_SECTIONS) - 1
+            elif tab == 1:
+                offsets[1] = max(0, len(COMMANDS) - limit)
+            elif tab == 2:
+                offsets[2] = max(0, len(FLAT_SHORTCUTS) - limit)
+            _refresh()
+
+        # ── Next Tab ──────────────────────────────────────────
+        elif key in (readchar.key.RIGHT, "l", readchar.key.TAB, "\t", "\x1b[C", "\x1bOC"):
+            tab = (tab + 1) % len(TABS)
+            _refresh()
+
+        # ── Previous Tab ──────────────────────────────────────
+        elif key in (readchar.key.LEFT, "h", readchar.key.SHIFT_TAB, "\x1b[Z", "\x1b[D", "\x1bOD"):
+            tab = (tab - 1) % len(TABS)
+            _refresh()
+
+        # ── Shortcuts Direct Access ───────────────────────────
+        elif key == "?":
+            tab = 2
+            _refresh()
+
+        # ── Refresh Screen ────────────────────────────────────
+        elif key == readchar.key.CTRL_L:
+            _refresh()
+
+    console.clear()
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -487,14 +605,12 @@ def main() -> None:
     start_tab = TABS.index(args.tab)
 
     if args.no_interactive or not sys.stdout.isatty() or not HAS_READCHAR:
-        # Print all three tabs for non-interactive environments
-        for i in range(len(TABS)):
-            render_static(i)
+        # Print tab for non-interactive environments
+        render_static(start_tab)
     else:
         try:
-            render_interactive()
+            render_interactive(start_tab=start_tab)
         except Exception:
-            # Fallback gracefully
             render_static(start_tab)
 
 
