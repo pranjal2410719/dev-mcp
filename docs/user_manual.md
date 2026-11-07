@@ -1,6 +1,6 @@
-# 🧠 dev-mcp: AI Engineering Operating System — User Manual & Developer Guide (v2.1.0)
+# 🧠 dev-mcp: AI Engineering Operating System — User Manual & Developer Guide (v2.2.2)
 
-Welcome to the official User Manual and Developer Guide for **`dev-mcp` (Version 2.1.0)**. This document serves as the comprehensive technical reference for installing, configuring, automating, and contributing to the `dev-mcp` Model Context Protocol (MCP) server.
+Welcome to the official User Manual and Developer Guide for **`dev-mcp` (Version 2.2.2)**. This document serves as the comprehensive technical reference for installing, configuring, automating, and contributing to the `dev-mcp` Model Context Protocol (MCP) server.
 
 ---
 
@@ -24,7 +24,24 @@ For issues, questions, or collaboration requests, contact:
 - *(Optional)* **agent-desktop** (`npm install -g agent-desktop`) for desktop GUI automation and AT-SPI accessibility tree inspection.
 - *(Optional)* **ripgrep** (`sudo apt install ripgrep`) for accelerated code search.
 
-### Local Installation
+### Installation Options
+
+#### A. Zero-Install Execution via uvx (Recommended)
+You can run the server directly without manual environment configuration:
+```bash
+uvx --from braynix-dev-mcp dev-mcp
+```
+
+#### B. Global System Installation
+```bash
+# Using uv tool
+uv tool install braynix-dev-mcp
+
+# Or standard pip / pipx
+pip install braynix-dev-mcp
+```
+
+#### C. Local Development Clone
 Navigate to your `dev-mcp` directory and set up a dedicated virtual environment:
 
 ```bash
@@ -48,7 +65,8 @@ pip install -e .
 
 Configure the server in your editor or assistant of choice. 
 
-* **Installed CLI Command:** `dev-mcp` (or via `uvx dev-mcp` / `pip install -e .`)
+* **Zero-Install (uvx):** `command: "uvx"`, `args: ["--from", "braynix-dev-mcp", "dev-mcp"]`
+* **Installed CLI Command:** `dev-mcp` (or via `pip install braynix-dev-mcp`)
 * **Source Invocation (venv):** `/path/to/dev-mcp/.venv/bin/python /path/to/dev-mcp/server.py`
 
 ### Dynamic Tool Profiling (`DEV_MCP_PROFILE`)
@@ -68,6 +86,15 @@ Add the configuration to:
 {
   "mcpServers": {
     "dev-mcp": {
+      "command": "uvx",
+      "args": ["--from", "braynix-dev-mcp", "dev-mcp"],
+      "env": {
+        "DEV_MCP_PROFILE": "all"
+      }
+    }
+  }
+}
+```
       "command": "/path/to/dev-mcp/.venv/bin/python",
       "args": ["/path/to/dev-mcp/server.py"],
       "env": {

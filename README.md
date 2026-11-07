@@ -1,6 +1,6 @@
 <!-- mcp-name: io.github.pranjal2410719/dev-mcp -->
 
-# 🧠 dev-mcp: AI Engineering Operating System (v2.2.0)
+# 🧠 dev-mcp: AI Engineering Operating System (v2.2.2)
 
 `dev-mcp` is a production-grade **Model Context Protocol (MCP)** server that turns your AI assistants (Claude, Cursor, Gemini, Cline, Roo Code, Windsurf, Antigravity CLI) into autonomous **Technical Project Managers and Desktop Automation Engineers**. 
 
@@ -19,22 +19,22 @@ For inquiries, support, or technical contributions, reach out to:
 
 ---
 
-## ⚡ What's New in v2.1.0?
+## ⚡ What's New in v2.2.2?
 
+* **Top-Pinned Terminal Viewport & Windowed Scrolling**:
+  - `dev-mcp-guide` dynamically calculates terminal window dimensions (`lines - 9`) and windows table rows, completely eliminating viewport overflow and auto-scrolling to the bottom.
+  - Every view starts pinned at **Row 1 / Tool #1 / Section 1**.
+  - Full manual keyboard scrolling: <kbd>↑</kbd>/<kbd>↓</kbd> (or <kbd>j</kbd>/<kbd>k</kbd>) for row navigation, <kbd>PgUp</kbd>/<kbd>PgDn</kbd> for page jumps, and <kbd>Home</kbd>/<kbd>End</kbd> (or <kbd>g</kbd>/<kbd>G</kbd>) for jumping directly to top/bottom.
+  - General quickstart paginates section-by-section with live progress indicators (`● 1  ○ 2  ○ 3  ○ 4  ○ 5`).
+* **Python 3.10 / 3.11 Backward Compatibility (v2.2.1)**:
+  - Resolved Python 3.10/3.11 `SyntaxError` in `tools/git_ops.py` for nested f-strings.
+* **Streamlined Single-Panel Diagnostic Banner**:
+  - Suppressed duplicate internal FastMCP startup notices (`show_banner=False`) and routes all diagnostics cleanly to `sys.stderr`.
+* **Zero-Install PyPI Distribution (`braynix-dev-mcp`) & MCP Registry**:
+  - Run instantly anywhere via `uvx --from braynix-dev-mcp dev-mcp`.
+  - Registered under namespace `io.github.pranjal2410719/dev-mcp`.
 * **91 Registered MCP Tools across 18 specialized modules.**
-* **Dynamic Tool Profiling (`DEV_MCP_PROFILE`)**: Slash LLM prompt token consumption by up to **75%** by loading only the tools relevant to your workflow (`code`, `planning`, `audit`, `desktop`, or `all`).
-* **Desktop GUI Automation & Verification (`tools/desktop_ops.py`)**: 16 dedicated tools plus a universal dispatcher (`desktop_action`) integrating with `agent-desktop` (Linux AT-SPI / X11 / Wayland, macOS, Windows) for 100% full-coverage GUI inspection, clicking, typing, shortcut dispatching, and window automation.
-* **High-Speed Filesystem & Search**:
-  - **26.2× faster** path validation in `security.py` (0.087ms vs 2.28ms).
-  - Sliced reads (`start_line`, `end_line`), line numbering, and safety truncation (>2,500 lines).
-  - Atomic writing via temporary files and `os.replace`.
-  - In-place string editing with exact `count` control and whitespace mismatch assistance.
-  - Multi-file atomic batch replacements (`batch_replace`).
-  - File metadata inspection (`file_info`).
-  - Automatic noise filtering (`.git`, `node_modules`, `__pycache__`, `.venv`, `.next`, `dist`, `build`).
-  - Native Ripgrep (`rg`) search with Python regex fallback.
-* **AST Dependency & Blast Radius Caching**: `mtime`-backed AST parse caching (`_FILE_PARSE_CACHE`) reduces dependency traversal times to sub-millisecond speeds.
-* **Persistent Git Hook Automation (`install_git_hooks`)**: Automatically generates a Git pre-commit hook that syncs `.project_brain` on every native terminal commit.
+* **Dynamic Tool Profiling (`DEV_MCP_PROFILE`)**: Slash LLM prompt token consumption by up to **75%** (`code`, `planning`, `audit`, `desktop`, `all`).
 
 ---
 
@@ -65,22 +65,18 @@ Project Workspace       Security Sandbox           Desktop Automation
 
 ## 🌟 Enhanced Startup Banner
 
-On server boot, `dev-mcp` renders a rich visual banner with active profile status and host diagnostics:
+On server boot, `dev-mcp` renders a clean, single-panel diagnostic banner pinned cleanly at the top of your terminal without duplicate boxes:
 
-```bash
-╭──────────────────────────────────────────────────────────────────────────────╮
-│                                                                              │
-│                         ▄▀▀ ▄▀█ █▀▀ ▀█▀ █▀▄▀█ █▀▀ █▀█                        │
-│                         █▀  █▀█ ▄▄█  █  █ ▀ █ █▄▄ █▀▀                        │
-│                                                                              │
-│                                FastMCP 3.4.2                                 │
-│                            https://gofastmcp.com                             │
-│                                                                              │
-│                  🖥  Server:      dev-mcp, 3.4.2                              │
-│                  🎯 Profile:     ALL (91 Tools / 18 Modules)                 │
-│                  🚀 Deploy free: https://horizon.prefect.io                  │
-│                                                                              │
-╰──────────────────────────────────────────────────────────────────────────────╯
+```text
+╭─ 🧠 dev-mcp v2.2.2 — AI Engineering Operating System ───────────────────────────────────╮
+│                                                                                         │
+│        Status:  ● Running (stdio transport)                                             │
+│       Profile:  all (18 modules · 91 tools)                                             │
+│     Workspace:  Jailed Lock Active · Mode: safe                                         │
+│  Distribution:  PyPI: braynix-dev-mcp · Registry: io.github.pranjal2410719/dev-mcp      │
+│    Docs & Web:  https://dev-mcp.me                                                      │
+│                                                                                         │
+╰─────────────────────────── Press ? for Interactive Guide · q to stop ───────────────────╯
 ```
 
 ---
@@ -109,9 +105,13 @@ dev-mcp-guide
 ```
 Or, while running the `dev-mcp` server interactively in a terminal, press `?`, `h`, or `/` to display the modal overlay.
 
-* **← / →** or **Tab**: Switch tabs (General, Commands, Shortcuts).
-* **↑ / ↓**: Scroll list entries.
-* **esc / q**: Return to the server loop.
+* **Top Pinned**: Viewport always starts pinned at Row 1 / Tool #1 / Section 1.
+* **← / →** or **Tab / Shift+Tab**: Switch tabs (`general`, `commands`, `shortcuts`).
+* **↑ / ↓** or **j / k**: Scroll list entries or navigate sections.
+* **PgUp / PgDn** (or **b / space**): Page up and down by full viewport.
+* **Home / End** (or **g / G**): Jump to top or bottom.
+* **?**: Jump directly to Shortcuts reference.
+* **esc / q**: Return to the server loop or terminal cleanly.
 
 ---
 
