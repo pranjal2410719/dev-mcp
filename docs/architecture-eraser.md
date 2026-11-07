@@ -1,6 +1,6 @@
 # dev-mcp Architecture Diagram
 
-> AI Engineering Operating System — FastMCP 3.4.2, Python 3.10+, 71 tools across 15 modules + 4 prompts + 2 resources
+> AI Engineering Operating System — FastMCP 3.4.2, Python 3.10+, 91 tools across 18 modules + 4 prompts + 2 resources
 
 ---
 
@@ -23,19 +23,21 @@ Codex [icon: terminal, color: gray]
 MCP stdio [icon: network, color: yellow]
 
 // ─── Entry Point ───────────────────────────────────────────────────────
-server.py [icon: python, color: blue]
+server.py [icon: python, color: blue, label: "server.py\nPipe Mode (stdio) | TTY Interactive Mode\nDEV_MCP_PROFILE Resolver"]
 
 // ─── FastMCP Core ──────────────────────────────────────────────────────
 FastMCP [icon: server, color: blue, label: "FastMCP 3.4.2 (app.py)"]
-Security [icon: lock, color: red, label: "security.py — Path Whitelist\nDEV_MCP_ALLOWED_DIRS\nsafe / trusted / lab modes"]
+Security [icon: lock, color: red, label: "security.py — Workspace Lock\nDEV_MCP_ALLOWED_DIRS\nsafe / trusted / lab modes"]
 ProjectContext [icon: database, color: green, label: "context.py — ProjectContext\nIdentity, Tech Stack, Architecture\nConventions, Key Files, Tasks, Goals, Decisions"]
 
 // ─── Tools Layer ───────────────────────────────────────────────────────
-FileOps [icon: files, color: blue, label: "file_ops.py (8 tools)\nread_file, write_file, edit_file\ndelete_path, delete_recursive\nlist_directory, glob_files, create_directory"]
-Search [icon: search, color: blue, label: "search.py (1 tool)\nsearch_code — ripgrep"]
-Terminal [icon: terminal, color: blue, label: "terminal.py (1 tool)\nrun_command — subprocess + timeout"]
-GitOps [icon: git, color: orange, label: "git_ops.py (7 tools)\ngit_status, git_diff, git_log, git_branch\ngit_add, git_commit, git_create_branch"]
+FileOps [icon: files, color: blue, label: "file_ops.py (10 tools)\nread_file, write_file, edit_file, batch_replace, file_info\ndelete_path, delete_recursive\nlist_directory, glob_files, create_directory"]
+Search [icon: search, color: blue, label: "search.py (1 tool)\nsearch_code — ripgrep + regex fallback"]
+Terminal [icon: terminal, color: blue, label: "terminal.py (1 tool)\nrun_command — sandboxed subprocess + timeout"]
+GitOps [icon: git, color: orange, label: "git_ops.py (8 tools)\ngit_status, git_diff, git_log, git_branch\ngit_add, git_commit, git_create_branch, install_git_hooks"]
 ContextMgmt [icon: settings, color: green, label: "context_mgmt.py (11 tools)\ninit_context, get_context, update_context\nadd_to_context_list, add_key_file, add_task\nadd_decision, export_context_markdown\nremove_context_item, reset_context, project_info"]
+DesktopOps [icon: monitor, color: cyan, label: "desktop_ops.py (16 tools)\ndesktop_status, list_apps, list_windows, snapshot\nfind, click, type, press, scroll, launch, close_app\nfocus_window, clipboard, verify_element, screenshot, action"]
+Profile [icon: filter, color: cyan, label: "profile.py (1 tool)\nget_dev_mcp_profile"]
 
 // ─── Brain Layer ───────────────────────────────────────────────────────
 PRDManager [icon: file-text, color: purple, label: "prd_manager.py (4 tools)\nget_prd, update_prd, summarize_prd\ncompare_work_to_prd"]
@@ -44,7 +46,7 @@ TodoEngine [icon: check-square, color: purple, label: "todo_engine.py (6 tools)\
 HandoffEngine [icon: share-2, color: purple, label: "handoff_engine.py (3 tools)\ngenerate_handoff, get_last_handoff\nlist_handoffs"]
 Orchestrator [icon: cpu, color: purple, label: "orchestrator.py (6 tools)\ngenerate_project_brain, next_best_action\nstart_session, end_session\nprepare_commit, commit_changes"]
 Guardian [icon: shield, color: red, label: "guardian.py (1 tool)\nvalidate_architecture"]
-Dependency [icon: git-merge, color: orange, label: "dependency.py (2 tools)\nbuild_dependency_graph, impact_analysis"]
+Dependency [icon: git-merge, color: orange, label: "dependency.py (2 tools)\nbuild_dependency_graph, impact_analysis\nAST cache (_FILE_PARSE_CACHE)"]
 SyncEngine [icon: refresh-cw, color: orange, label: "sync_engine.py (3 tools)\nverify_work, sync_workspace\nproject_dashboard"]
 Requirements [icon: clipboard, color: green, label: "requirements.py (3 tools)\nextract_requirements, verify_requirements\nverify_outcome"]
 Readiness [icon: check-circle, color: green, label: "project_readiness.py (8 tools)\nassess_project_readiness, project_readiness_report\nbootstrap_project, adopt_existing_project\ndoctor, reset_project_brain\narchive_project_brain, create_project_workspace"]
@@ -56,6 +58,7 @@ Resources [icon: package, color: yellow, label: "resources/ (2 MCP resources)\np
 // ─── Persistence ───────────────────────────────────────────────────────
 ProjectBrain [icon: database, color: gray, label: ".project_brain/ (per workspace)\ncontext.json\nprd/: PRD.md, VISION.md, SCOPE.md\nphases/: phases.json\ntodos/: active.json, completed.json\nhandoffs/: AI session summaries"]
 DiskFS [icon: hard-drive, color: gray, label: "Project Workspace\n(DEV_MCP_ALLOWED_DIRS)"]
+DesktopHost [icon: cpu, color: gray, label: "Desktop Host OS\n(agent-desktop CLI / AT-SPI / Screen)"]
 
 // ─── Connections ──────────────────────────────────────────────────────
 Antigravity > MCP stdio
@@ -75,6 +78,8 @@ FastMCP > Search
 FastMCP > Terminal
 FastMCP > GitOps
 FastMCP > ContextMgmt
+FastMCP > DesktopOps
+FastMCP > Profile
 
 FastMCP > PRDManager
 FastMCP > PhaseManager
@@ -94,6 +99,7 @@ Security > DiskFS
 FileOps > DiskFS
 Terminal > DiskFS
 GitOps > DiskFS
+DesktopOps > DesktopHost
 
 PRDManager > ProjectBrain
 PhaseManager > ProjectBrain
@@ -114,12 +120,12 @@ Resources < ProjectContext
 
 | Layer | Modules | Tools |
 |-------|---------|-------|
-| Tools | 5 | 28 |
+| Tools | 7 | 48 |
 | Brain | 10 | 43 |
-| **Total Tools** | **15** | **71** |
+| **Total Tools** | **18** | **91** |
 | Prompts | 1 | 4 |
 | Resources | 1 | 2 |
-| **Total Capabilities** | **17** | **77** |
+| **Total Capabilities** | **20** | **97** |
 
 ---
 

@@ -30,31 +30,42 @@ Antigravity executes MCP processes using standard pipe configurations.
 
 ### Configuration Template
 
-To configure the Antigravity runtime to load `dev-mcp`, register the server path inside your environment or setup files:
+To configure the Antigravity runtime to load `dev-mcp`, register the server in your `~/.gemini/antigravity-cli/mcp_config.json`:
 
+**Option A: Installed CLI command (recommended)**
 ```json
 {
   "mcpServers": {
     "dev-mcp": {
-      "command": "/path/to/dev-mcp/.venv/bin/python",
-      "args": ["/path/to/dev-mcp/server.py"]
+      "command": "dev-mcp",
+      "env": {
+        "DEV_MCP_PROFILE": "all"
+      }
     }
   }
 }
 ```
 
-### Running the Auto-Approval Tool (`agy-auto`)
-To accelerate development cycles, you can run the auto-approval script:
-```bash
-./agy-auto --prompt-interactive "Onboard my nextjs project"
+**Option B: Local source checkout**
+```json
+{
+  "mcpServers": {
+    "dev-mcp": {
+      "command": "/path/to/dev-mcp/.venv/bin/python",
+      "args": ["/path/to/dev-mcp/server.py"],
+      "env": {
+        "DEV_MCP_PROFILE": "all"
+      }
+    }
+  }
+}
 ```
-This launches Antigravity with sandbox protections enabled, automatically accepting standard tool permissions (e.g. read/write files under project root).
 
 ---
 
 ## 💬 3. Standard Integration Commands
 
-> **Important Distinction:** Slash commands (e.g., `/goal`, `/schedule`, `/grill-me`, `/teamwork-preview`, `/learn`) are **host client features** of Google DeepMind's Antigravity CLI (`agy`), **not** MCP tools provided by `dev-mcp`. The `dev-mcp` server exposes 71 standard MCP tools (such as `create_task`, `sync_workspace`, `verify_work`, `bootstrap_project`), which the Antigravity agentic engine invokes autonomously during these sessions.
+> **Important Architectural Distinction:** Slash commands (e.g., `/goal`, `/schedule`, `/grill-me`, `/teamwork`, `/learn`) are **host client features** provided by Google DeepMind's Antigravity CLI (`agy`), **not** native MCP tools implemented by `dev-mcp`. The `dev-mcp` server exposes **91 standard MCP tools across 18 modules** (such as `create_task`, `sync_workspace`, `verify_work`, `bootstrap_project`, `desktop_snapshot`), which the Antigravity agentic engine invokes autonomously to inspect, modify, and verify the workspace during these sessions.
 
 When pair-programming with Antigravity, developers frequently use the following host slash commands:
 - **`/goal`**: Start long-running, multi-step autonomous development cycles.

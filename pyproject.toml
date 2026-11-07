@@ -1,35 +1,63 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "dev-mcp"
-version = "2.1.0"
-description = "A custom MCP server for managing, building, editing, and customizing projects with AI"
+name = "braynix-dev-mcp"
+version = "2.2.0"
+description = "AI Engineering Operating System and local MCP server."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
+
 authors = [
     { name = "Pranjal Yadav", email = "2k24.cs1l.2410719@gmail.com" }
 ]
 maintainers = [
     { name = "Pranjal Yadav", email = "2k24.cs1l.2410719@gmail.com" }
 ]
-keywords = ["mcp", "model-context-protocol", "fastmcp", "ai-engineering", "project-management"]
+
+keywords = [
+    "mcp",
+    "model-context-protocol",
+    "fastmcp",
+    "ai-engineering",
+    "developer-tools",
+    "project-management"
+]
+
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+
 dependencies = [
-    "fastmcp>=2.0.0",
+    "fastmcp>=3.4.2,<4",
     "readchar>=4.0.0",
+    "rich>=13.7.0"
 ]
 
 [project.urls]
-Homepage = "https://github.com/pranjal2410719/dev-mcp"
+Homepage = "https://dev-mcp.me"
 Repository = "https://github.com/pranjal2410719/dev-mcp"
+Issues = "https://github.com/pranjal2410719/dev-mcp/issues"
 
 [project.scripts]
 dev-mcp = "server:main"
 dev-mcp-guide = "cli:main"
 
 [tool.setuptools]
-packages = ["brain", "prompts", "resources", "tools"]
-py-modules = ["app", "cli", "context", "security", "server"]
+packages = [
+    "brain",
+    "prompts",
+    "resources",
+    "tools"
+]
+
+py-modules = [
+    "app",
+    "cli",
+    "context",
+    "security",
+    "server"
+]

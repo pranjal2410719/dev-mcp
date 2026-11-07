@@ -12,7 +12,6 @@ For questions, community syncs, or active partnerships, feel free to reach out t
 
 * **Name:** Pranjal Yadav
 * **Email:** [2k24.cs1l.2410719@gmail.com](mailto:2k24.cs1l.2410719@gmail.com)
-* **Phone:** +91 9219920362
 * **LinkedIn:** [linkedin.com/in/-pranjal22/](https://www.linkedin.com/in/-pranjal22/)
 * **GitHub Profile:** [github.com/pranjal2410719](https://github.com/pranjal2410719)
 * **Project Repository:** [github.com/pranjal2410719/dev-mcp](https://github.com/pranjal2410719/dev-mcp)
@@ -21,12 +20,12 @@ For questions, community syncs, or active partnerships, feel free to reach out t
 
 ## 📐 Architecture Overview & Module Layout
 
-The codebase of `dev-mcp` is cleanly separated into three layers: **Core**, **Tools**, and **Brain**, comprising **15 tool modules** and **71 registered MCP tools** (along with 2 resources and 4 prompts).
+The codebase of `dev-mcp` is cleanly separated into three layers: **Core**, **Tools**, and **Brain**, comprising **18 tool modules** and **91 registered MCP tools** (along with 2 resources and 4 prompts).
 
 ```mermaid
 graph TD
     server[server.py Entry Point] --> app[app.py FastMCP Instance]
-    server --> tools[tools/ Generic Tools]
+    server --> tools[tools/ Generic & Desktop Tools]
     server --> brain[brain/ Specialized PM Engines]
     server --> prompts[prompts/ Definitions]
     server --> resources[resources/ Definitions]
@@ -39,6 +38,8 @@ graph TD
     tools --> git_ops[git_ops.py]
     tools --> terminal[terminal.py]
     tools --> context_mgmt[context_mgmt.py]
+    tools --> desktop_ops[desktop_ops.py]
+    tools --> profile[profile.py]
     
     brain --> prd[prd_manager.py]
     brain --> phase[phase_manager.py]
@@ -53,18 +54,20 @@ graph TD
 ```
 
 ### 1. Core Layer
-* **[server.py](server.py)**: The main execution script. Implements a dual-mode entrypoint: runs stdio JSON-RPC directly for MCP host clients in non-interactive pipe mode, or runs a background daemon server thread with an interactive `/dev/tty` shortcut listener and Rich ASCII banner in TTY mode.
+* **[server.py](server.py)**: The main execution script. Implements a dual-mode entrypoint: runs stdio JSON-RPC directly for MCP host clients in non-interactive pipe mode, or runs a background daemon server thread with an interactive `/dev/tty` shortcut listener and Rich ASCII banner in TTY mode. Resolves dynamic module loading according to `DEV_MCP_PROFILE`.
 * **[app.py](app.py)**: Manages shared server state, initializes the `FastMCP` instance, and hosts the context loader (`load_context`). The loader prevents cross-project state leakage by detecting when the requested directory differs from the cached instance.
 * **[context.py](context.py)**: Implements the `ProjectContext` class, which manages key-value store transactions against `.project-context.json` using dot-notation, handles defaults, and generates markdown reports for LLM clients.
 * **[security.py](security.py)**: The security controller. Enforces Workspace Lock (strict jailing of file operations and paths to the active project root in `safe` and `trusted` modes), provides stack-inspected onboarding bypass for `bootstrap_project`, `create_project_workspace`, and `adopt_existing_project`, and implements 3 configurable safety modes (`safe`, `trusted`, `lab`).
 
-### 2. Tools Layer (Generic — 28 Tools across 5 Modules)
-Stateless utility wrappers exposing standard operating system functions to the LLM:
-* **[tools/file_ops.py](tools/file_ops.py)**: Handles sandboxed file manipulation (8 tools: `read_file`, `write_file`, `edit_file`, `delete_path`, `delete_recursive`, `list_directory`, `glob_files`, `create_directory`).
-* **[tools/search.py](tools/search.py)**: Ripgrep-based code pattern search with a robust, pure-Python fallback search if `rg` is not installed on the system (1 tool: `search_code`).
+### 2. Tools Layer (48 Tools across 7 Modules)
+Stateless utility wrappers exposing operating system and GUI functions to the LLM:
+* **[tools/file_ops.py](tools/file_ops.py)**: Handles sandboxed file manipulation with sliced reads, line numbering, atomic temporary writes, and whitespace mismatch assistance (10 tools: `read_file`, `write_file`, `edit_file`, `batch_replace`, `file_info`, `delete_path`, `delete_recursive`, `list_directory`, `glob_files`, `create_directory`).
+* **[tools/search.py](tools/search.py)**: High-speed Ripgrep-based code pattern search with a robust, pure-Python fallback search if `rg` is not installed on the system (1 tool: `search_code`).
 * **[tools/terminal.py](tools/terminal.py)**: Safely runs local terminal commands with strict timeouts and pattern blocklists (1 tool: `run_command`).
-* **[tools/git_ops.py](tools/git_ops.py)**: Operates local Git repositories (7 tools: `git_status`, `git_diff`, `git_log`, `git_branch`, `git_add`, `git_commit`, `git_create_branch`).
+* **[tools/git_ops.py](tools/git_ops.py)**: Operates local Git repositories and installs automated pre-commit brain synchronization hooks (8 tools: `git_status`, `git_diff`, `git_log`, `git_branch`, `git_add`, `git_commit`, `git_create_branch`, `install_git_hooks`).
 * **[tools/context_mgmt.py](tools/context_mgmt.py)**: Direct getters and setters to query, modify, add, and remove records in `.project-context.json` (11 tools: `init_context`, `get_context`, `update_context`, `add_to_context_list`, `add_key_file`, `add_task`, `add_decision`, `export_context_markdown`, `remove_context_item`, `reset_context`, `project_info`).
+* **[tools/desktop_ops.py](tools/desktop_ops.py)**: Desktop GUI automation suite interfacing with `agent-desktop` across Linux AT-SPI, macOS, and Windows (16 tools: `desktop_status`, `desktop_list_apps`, `desktop_list_windows`, `desktop_snapshot`, `desktop_find`, `desktop_click`, `desktop_type`, `desktop_press`, `desktop_scroll`, `desktop_launch`, `desktop_close_app`, `desktop_focus_window`, `desktop_clipboard`, `desktop_verify_element`, `desktop_screenshot`, `desktop_action`).
+* **[tools/profile.py](tools/profile.py)**: Server profile inspection (1 tool: `get_dev_mcp_profile`).
 
 ### 3. Brain Layer (Project Operating System — 43 Tools across 10 Modules)
 Specialized PM algorithms driving the AI development lifecycle:

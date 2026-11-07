@@ -1,6 +1,6 @@
 # 📁 Workspace Isolation & Directory Structure
 
-This document outlines the multi-workspace architecture of **`dev-mcp` v2.0.0**, designed to isolate project brain states and prevent data leakage across AI-generated codebases.
+This document outlines the multi-workspace architecture of **`dev-mcp` v2.1.0**, designed to isolate project brain states and prevent data leakage across AI-generated codebases.
 
 ---
 
@@ -38,7 +38,7 @@ The server's internal context engine dynamically switches state based on the pat
 
 ## 🛠️ 3. Workspace Creation Flow
 
-To spawn a new isolated workspace dynamically, call the `create_project_workspace` tool (one of the 71 registered tools in `dev-mcp`):
+To spawn a new isolated workspace dynamically, call the `create_project_workspace` tool (one of the 91 registered tools in `dev-mcp`):
 ```python
 create_project_workspace(name="saas-dashboard", template="nextjs", path="./workspaces")
 ```

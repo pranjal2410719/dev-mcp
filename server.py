@@ -3,7 +3,7 @@ dev-mcp: A custom MCP server for managing, building, editing, and customizing pr
 
 This is the entry-point module.  It imports the FastMCP instance from ``app``,
 then imports all tool, prompt, resource, and brain modules so they register
-their decorators (71 registered tools, 2 resources, and 4 prompts across 15 modules),
+their decorators (91 registered tools, 2 resources, and 4 prompts across 18 modules),
 and finally starts the server.
 
 Module organisation
@@ -11,14 +11,16 @@ Module organisation
 ::
 
     app.py                  FastMCP instance + shared global state
-    security.py             Path-validation helpers
+    security.py             Path-validation helpers & workspace lock
     context.py              ProjectContext data-store class
-    tools/                  28 existing generic tools across 5 modules
-      file_ops.py           8 tools — read, write, edit, delete, list, glob, mkdir
-      search.py             1 tool  — ripgrep-based code search
-      terminal.py           1 tool  — shell command execution
-      git_ops.py            7 tools — status, diff, log, branch, add, commit, create-branch
+    tools/                  48 tools across 7 modules
+      file_ops.py          10 tools — read, write, edit, batch_replace, file_info, delete, list, glob, mkdir
+      search.py             1 tool  — ripgrep-based code search with regex fallback
+      terminal.py           1 tool  — sandboxed shell command execution
+      git_ops.py            8 tools — status, diff, log, branch, add, commit, create-branch, install_git_hooks
       context_mgmt.py      11 tools — context CRUD, tasks, decisions, project-info
+      desktop_ops.py       16 tools — GUI snapshot, element finding, clicking, typing, shortcuts, window control
+      profile.py            1 tool  — get_dev_mcp_profile active profile inspection
     brain/                  Project Brain — 43 tools across 10 modules
       prd_manager.py        4 tools — get/update/summarize/compare PRD
       phase_manager.py      7 tools — phase lifecycle, milestones
@@ -26,7 +28,7 @@ Module organisation
       handoff_engine.py     3 tools — AI handoff generation
       orchestrator.py       6 tools — session lifecycle, project brain, commit flow
       guardian.py           1 tool  — architectural rule validation
-      dependency.py         2 tools — dependency graph & blast radius impact analysis
+      dependency.py         2 tools — cached AST dependency graph & blast radius impact analysis
       sync_engine.py        3 tools — git reality sync, task verification, dashboard
       requirements.py       3 tools — PRD requirement extraction, verification & outcome audit
       project_readiness.py  8 tools — onboarding maturity, doctor, workspace creation
@@ -62,7 +64,6 @@ PROFILE_MODULES = {
         "tools.git_ops",
         "tools.context_mgmt",
         "brain.dependency",
-        "tools.desktop_ops",
         "brain.orchestrator",
         "prompts.definitions",
         "resources.definitions",

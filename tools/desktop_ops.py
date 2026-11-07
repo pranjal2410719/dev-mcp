@@ -18,13 +18,22 @@ from app import mcp
 
 
 def _get_agent_desktop_bin() -> str:
-    """Locate the agent-desktop binary."""
+    """Locate the agent-desktop binary across standard system and user npm paths."""
     found = shutil.which("agent-desktop")
     if found:
         return found
-    fallback = Path("/home/dev/.npm-global/bin/agent-desktop")
-    if fallback.is_file() and os.access(fallback, os.X_OK):
-        return str(fallback)
+    
+    candidate_paths = [
+        Path.home() / ".npm-global" / "bin" / "agent-desktop",
+        Path.home() / ".local" / "bin" / "agent-desktop",
+        Path("/usr/local/bin/agent-desktop"),
+        Path("/usr/bin/agent-desktop"),
+        Path.home() / "AppData" / "Roaming" / "npm" / "agent-desktop.cmd",
+    ]
+    for p in candidate_paths:
+        if p.is_file() and os.access(p, os.X_OK):
+            return str(p)
+
     raise RuntimeError(
         "agent-desktop CLI not found. Install it using: npm install -g agent-desktop"
     )
@@ -32,7 +41,15 @@ def _get_agent_desktop_bin() -> str:
 
 def _run_ad_command(args: list[str], timeout: int = 30) -> dict | str:
     """Execute agent-desktop CLI command and parse JSON output."""
-    binary = _get_agent_desktop_bin()
+    try:
+        binary = _get_agent_desktop_bin()
+    except RuntimeError as e:
+        return {
+            "ok": False,
+            "error": str(e),
+            "install_hint": "npm install -g agent-desktop"
+        }
+
     cmd = [binary] + args
     try:
         res = subprocess.run(

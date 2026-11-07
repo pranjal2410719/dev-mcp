@@ -7,7 +7,7 @@ Run directly:
 
 Displays a rich, tab-navigable interface with:
   • General  — about, quick-start, config snippets
-  • Commands — all 71 MCP tools with short descriptions
+  • Commands — all 91 MCP tools with short descriptions
   • Shortcuts — key-binding reference (mirrors Antigravity CLI style)
 """
 
@@ -97,6 +97,8 @@ COMMANDS: list[tuple[str, str, str]] = [
     ("File Ops",    "read_file",              "Read a file's contents"),
     ("File Ops",    "write_file",             "Write / overwrite a file"),
     ("File Ops",    "edit_file",              "Patch specific lines in a file"),
+    ("File Ops",    "batch_replace",          "Atomic multi-file text replacement"),
+    ("File Ops",    "file_info",              "File size, line count, permissions"),
     ("File Ops",    "delete_path",            "Delete a file or directory"),
     ("File Ops",    "delete_recursive",       "Recursively delete a directory"),
     ("File Ops",    "list_directory",         "List directory contents"),
@@ -113,6 +115,7 @@ COMMANDS: list[tuple[str, str, str]] = [
     ("Git",         "git_add",                "Stage files"),
     ("Git",         "git_commit",             "Commit staged changes"),
     ("Git",         "git_create_branch",      "Create & switch to a branch"),
+    ("Git",         "install_git_hooks",      "Install brain pre-commit sync hook"),
     # ── Context Management ────────────────────────
     ("Context",     "init_context",           "Initialise project context"),
     ("Context",     "get_context",            "Retrieve current context"),
@@ -179,6 +182,25 @@ COMMANDS: list[tuple[str, str, str]] = [
     ("Util",        "doctor",                 "Health-check the MCP server"),
     ("Util",        "reset_project_brain",    "Reset the project brain store"),
     ("Util",        "archive_project_brain",  "Archive project brain snapshot"),
+    # ── Desktop Automation ────────────────────────
+    ("Desktop",     "desktop_status",         "Inspect agent-desktop & AT-SPI bus"),
+    ("Desktop",     "desktop_list_apps",      "List running GUI applications"),
+    ("Desktop",     "desktop_list_windows",   "List desktop windows & bounds"),
+    ("Desktop",     "desktop_snapshot",       "Capture accessibility tree snapshot"),
+    ("Desktop",     "desktop_find",           "Find UI elements by name or role"),
+    ("Desktop",     "desktop_click",          "Semantic or coordinate mouse click"),
+    ("Desktop",     "desktop_type",           "Type text into target UI elements"),
+    ("Desktop",     "desktop_press",          "Send keyboard shortcuts / combos"),
+    ("Desktop",     "desktop_scroll",         "Scroll element or window viewport"),
+    ("Desktop",     "desktop_launch",         "Launch desktop application"),
+    ("Desktop",     "desktop_close_app",      "Close or terminate application"),
+    ("Desktop",     "desktop_focus_window",   "Bring target window into focus"),
+    ("Desktop",     "desktop_clipboard",      "Read, write, or clear clipboard"),
+    ("Desktop",     "desktop_verify_element", "Assert GUI element exists and state"),
+    ("Desktop",     "desktop_screenshot",     "Capture PNG screenshot of window"),
+    ("Desktop",     "desktop_action",         "Universal agent-desktop dispatcher"),
+    # ── Server Profile ────────────────────────────
+    ("Profile",     "get_dev_mcp_profile",    "Inspect active profile & loaded tools"),
 ]
 
 GENERAL_SECTIONS = [
