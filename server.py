@@ -174,29 +174,35 @@ import threading
 from rich.console import Console
 from rich.panel import Panel
 from rich.align import Align
+from rich.table import Table
+
 
 def _print_banner() -> None:
-    """Render the attractive startup banner with ASCII art and server info."""
-    profile_info = f"profile: {ACTIVE_PROFILE} ({len(LOADED_MODULES)} modules)"
-    ascii_art = f"""
-╭──────────────────────────────────────────────────────────────────────────────╮
-│                                                                              │
-│                         ▄▀▀ ▄▀█ █▀▀ ▀█▀ █▀▄▀█ █▀▀ █▀█                        │
-│                         █▀  █▀█ ▄▄█  █  █ ▀ █ █▄▄ █▀▀                        │
-│                                                                              │
-│                                                                              │
-│                                                                              │
-│                                FastMCP 3.4.2                                 │
-│                            https://gofastmcp.com                             │
-│                                                                              │
-│                  🖥  Server:      dev-mcp, 3.4.2 ({profile_info})            │
-│                  🚀 Deploy free: https://horizon.prefect.io                  │
-│                                                                              │
-╰──────────────────────────────────────────────────────────────────────────────╯
-"""
-    console = Console()
-    panel = Panel(Align.center(ascii_art, vertical="middle"), border_style="bright_blue")
+    """Render the attractive startup banner with server info to stderr."""
+    console = Console(stderr=True)
+    grid = Table.grid(padding=(0, 2))
+    grid.add_column(style="bold cyan", justify="right")
+    grid.add_column(style="white")
+
+    grid.add_row("Status:", "[bold green]● Running[/bold green] (stdio transport)")
+    grid.add_row("Profile:", f"[bold white]{ACTIVE_PROFILE}[/bold white] [dim]({len(LOADED_MODULES)} modules · 91 tools)[/dim]")
+    grid.add_row("Workspace:", "[dim]Jailed Lock Active[/dim] · Mode: [bold]safe[/bold]")
+    grid.add_row("Distribution:", "PyPI: [bold green]braynix-dev-mcp[/bold green] · Registry: [bold blue]io.github.pranjal2410719/dev-mcp[/bold blue]")
+    grid.add_row("Docs & Web:", "[link=https://dev-mcp.me]https://dev-mcp.me[/link]")
+
+    panel = Panel(
+        grid,
+        title="[bold white]🧠 dev-mcp [cyan]v2.2.1[/cyan][/bold white] [dim]— AI Engineering Operating System[/dim]",
+        title_align="left",
+        subtitle="[dim]Press [bold cyan]?[/bold cyan] for Interactive Guide · [bold red]q[/bold red] to stop[/dim]",
+        subtitle_align="right",
+        border_style="bright_blue",
+        padding=(1, 2),
+    )
+
+    console.print()
     console.print(panel)
+    console.print()
 
 
 # ── ANSI helpers (no external dep needed here) ─────────────────────────────
@@ -204,18 +210,6 @@ def _print_banner() -> None:
 def _c(code: str, text: str) -> str:
     """Wrap text in an ANSI escape code."""
     return f"\033[{code}m{text}\033[0m"
-
-
-def _print_hint(still_running: bool = False) -> None:
-    """Write the interactive hint line to stderr."""
-    label = "Server still running" if still_running else "Server running"
-    sys.stderr.write(
-        f"\n  {_c('1;32', '●')} {_c('2', label)}  │  "
-        f"Press {_c('1;36', '?')} for shortcut guide  "
-        f"{_c('2', '·')}  "
-        f"{_c('2', 'esc / q')} to stop\n\n"
-    )
-    sys.stderr.flush()
 
 
 # ── /dev/tty key reader ────────────────────────────────────────────────────
@@ -248,16 +242,13 @@ def _interactive_shell() -> None:
     Runs in the main thread while the MCP server runs in a daemon thread.
 
     Loop:
-      • Show hint line
+      • Show enhanced dev-mcp banner
       • Wait for a keypress on /dev/tty
-        – '?' / 'h' / '/'  →  open cli.py, resume loop on exit
+        – '?' / 'h' / '/'  →  open interactive guide, resume loop on exit
         – ESC / 'q' / ^C   →  print goodbye and os._exit(0)
         – anything else    →  ignore, loop again
     """
-    _print_hint(still_running=False)
-
-    guide = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cli.py")
-    _print_banner()  # Show enhanced banner before hint
+    _print_banner()
 
     while True:
         try:
@@ -266,10 +257,12 @@ def _interactive_shell() -> None:
             break
 
         if key in (b"?", b"h", b"/"):
-            # ── Open the guide; server keeps running in its thread ──────
-            subprocess.run([sys.executable, guide], check=False)
-            # User pressed ESC inside cli.py → came back here
-            _print_hint(still_running=True)
+            try:
+                from cli import main as cli_main
+                cli_main()
+            except Exception as err:
+                sys.stderr.write(f"Error launching guide: {err}\n")
+            _print_banner()
 
         elif key in (
             b"\x1b",        # ESC
@@ -284,7 +277,7 @@ def _interactive_shell() -> None:
     # ── Graceful exit ────────────────────────────────────────────────────
     sys.stderr.write(
         f"\n  {_c('2', 'Server stopped.')}  "
-        f"Run {_c('1', 'python server.py')} to restart.\n\n"
+        f"Run {_c('1', 'dev-mcp')} to restart.\n\n"
     )
     sys.stderr.flush()
     os._exit(0)   # kill the daemon server thread cleanly
@@ -306,12 +299,17 @@ def main() -> None:
     """
     if not sys.stdin.isatty():
         # MCP client is connected via pipe — run cleanly with no extras.
-        mcp.run()
+        mcp.run(show_banner=False)
         return
 
     # ── Interactive mode ─────────────────────────────────────────────────
-    # Start the MCP server in a background daemon thread.
-    server_thread = threading.Thread(target=mcp.run, daemon=True, name="mcp-server")
+    # Start the MCP server in a background daemon thread with show_banner=False
+    # so FastMCP does not double-print a duplicate unstyled box.
+    server_thread = threading.Thread(
+        target=lambda: mcp.run(show_banner=False),
+        daemon=True,
+        name="mcp-server",
+    )
     server_thread.start()
 
     # Hand control to the interactive shell (blocks until user quits).

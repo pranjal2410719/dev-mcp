@@ -207,59 +207,58 @@ GENERAL_SECTIONS = [
     (
         "🚀  What is dev-mcp?",
         textwrap.dedent("""\
-        dev-mcp is a [bold cyan]Model Context Protocol (MCP) server[/bold cyan] built with
-        [bold]FastMCP 2+[/bold] that gives any AI assistant (Claude, Gemini, Cursor, etc.)
-        a full project-management operating system — context, tasks, PRD, phases,
-        git, file-ops, architecture validation, and session handoffs — all in one
-        unified server.\
+        dev-mcp is an [bold cyan]AI Engineering Operating System[/bold cyan] built on FastMCP.
+        It equips coding assistants (Claude, Cursor, Gemini, Cline, Roo Code, Windsurf, Antigravity)
+        with persistent project memory — PRD specs, task graphs, phase tracking, architecture validation,
+        desktop GUI automation, and session handoffs stored directly in your workspace.\
         """),
     ),
     (
-        "⚙️  Quick start (stdio)",
+        "⚡  Quick Run & Installation",
         textwrap.dedent("""\
-        [dim]# 1. Install[/dim]
-        [bold green]pip install -e .[/bold green]   [dim]# or: uv pip install -e .[/dim]
+        [dim]# Option 1: Zero-install execution via uvx (recommended)[/dim]
+        [bold green]uvx --from braynix-dev-mcp dev-mcp[/bold green]
 
-        [dim]# 2. Run the MCP server (stdio transport — default)[/dim]
-        [bold green]python server.py[/bold green]
-        [dim]   — or —[/dim]
-        [bold green]dev-mcp[/bold green]   [dim](after pip install)[/dim]
+        [dim]# Option 2: Persistent install via pip or uv tool[/dim]
+        [bold green]pip install braynix-dev-mcp[/bold green]   [dim]# or: uv tool install braynix-dev-mcp[/dim]
+        [bold green]dev-mcp[/bold green]
 
-        [dim]# 3. Connect from your AI client[/dim]
-        Point Claude / Cursor / Windsurf at the stdio process above.\
+        [dim]# Option 3: Filter tools with dynamic profiles[/dim]
+        [bold green]DEV_MCP_PROFILE=code dev-mcp[/bold green]       [dim]# 56 tools (code & git)[/dim]
+        [bold green]DEV_MCP_PROFILE=planning dev-mcp[/bold green]   [dim]# 43 tools (PRD & tasks)[/dim]
+        [bold green]DEV_MCP_PROFILE=audit dev-mcp[/bold green]      [dim]# 58 tools (security & readiness)[/dim]
+        [bold green]DEV_MCP_PROFILE=desktop dev-mcp[/bold green]    [dim]# 39 tools (GUI automation)[/dim]\
         """),
     ),
     (
-        "🔌  Claude Desktop config snippet",
+        "🔌  Client Configuration (Zero-Install)",
         textwrap.dedent("""\
-        [dim]# ~/Library/Application Support/Claude/claude_desktop_config.json[/dim]
+        [dim]# In Claude Desktop or Cursor MCP settings:[/dim]
         [bold yellow]{[/bold yellow]
           [bold yellow]"mcpServers"[/bold yellow]: {
             [bold yellow]"dev-mcp"[/bold yellow]: {
-              [bold yellow]"command"[/bold yellow]: [bold green]"python"[/bold green],
-              [bold yellow]"args"[/bold yellow]: [[bold green]"/path/to/dev-mcp/server.py"[/bold green]]
+              [bold yellow]"command"[/bold yellow]: [bold green]"uvx"[/bold green],
+              [bold yellow]"args"[/bold yellow]: [[bold green]"--from"[/bold green], [bold green]"braynix-dev-mcp"[/bold green], [bold green]"dev-mcp"[/bold green]]
             }
           }
         [bold yellow]}[/bold yellow]\
         """),
     ),
     (
-        "📦  Transport options",
+        "🛡️  Safety & Workspace Lock",
         textwrap.dedent("""\
-        [bold]stdio[/bold]   (default) — pipe-based, zero config, local use
-        [bold]sse[/bold]     — HTTP Server-Sent Events, for remote / browser clients
-        [bold]ws[/bold]      — WebSocket transport
-
-        Set [bold cyan]FASTMCP_TRANSPORT[/bold cyan] env var or pass [bold]--transport[/bold]
-        when using the FastMCP CLI runner.\
+        [bold green]safe[/bold green] (default)   — strict realpath jailing; path traversal & destructive commands blocked.
+        [bold yellow]trusted[/bold yellow]        — in-bounds recursive deletions permitted for trusted pairing.
+        [bold red]lab[/bold red]            — multi-directory allowlists via DEV_MCP_ALLOWED_DIRS.\
         """),
     ),
     (
-        "📚  Useful links",
+        "🌐  Official Links & Documentation",
         textwrap.dedent("""\
-        • [link=https://github.com/pranjal2410719/dev-mcp]GitHub repo[/link]             github.com/pranjal2410719/dev-mcp
-        • [link=https://gofastmcp.com]FastMCP docs[/link]            gofastmcp.com
-        • [link=https://modelcontextprotocol.io]MCP spec[/link]                 modelcontextprotocol.io\
+        • [link=https://dev-mcp.me]Website & Studio[/link]      https://dev-mcp.me
+        • [link=https://pypi.org/project/braynix-dev-mcp/]PyPI Package[/link]        https://pypi.org/project/braynix-dev-mcp/
+        • [link=https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.pranjal2410719/dev-mcp]MCP Registry[/link]        io.github.pranjal2410719/dev-mcp
+        • [link=https://github.com/pranjal2410719/dev-mcp]GitHub Repo[/link]         github.com/pranjal2410719/dev-mcp\
         """),
     ),
 ]
